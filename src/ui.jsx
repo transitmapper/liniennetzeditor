@@ -1,0 +1,10 @@
+import React from "react";
+import {Dialog,DialogSurface,DialogBody,DialogTitle,DialogContent,DialogActions,Button,Input,Select,Label} from "@fluentui/react-components";
+import {useStore} from "./store.js";
+export const close=()=>useStore.setState({dlg:null});
+export const Shell=({open,title,children,side})=><Dialog open={open} modalType={side?"non-modal":"modal"} onOpenChange={(_,d)=>!d.open&&close()}><DialogSurface style={side?{inset:"150px 16px auto auto",margin:0,width:400,maxWidth:"95vw",height:"fit-content"}:{maxWidth:760,width:"92vw"}}><DialogBody><DialogTitle>{title}</DialogTitle><DialogContent style={{maxHeight:side?"55vh":"65vh",overflow:"auto"}}>{children}</DialogContent><DialogActions><Button appearance="primary" onClick={close}>Schließen</Button></DialogActions></DialogBody></DialogSurface></Dialog>;
+export const R=({children})=><div style={{display:"flex",gap:8,alignItems:"flex-end",flexWrap:"wrap",margin:"6px 0"}}>{children}</div>;
+export const Tx=({l,v,on,w,t})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><Input type={t||"text"} style={w?{width:w}:{}} value={String(v??"")} onChange={(_,d)=>{if(t==="number"){const n=+d.value;if(isFinite(n))on(n)}else on(d.value)}}/></div>;
+export const Sl=({l,v,o,on})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><Select value={v} onChange={(_,d)=>on(d.value)}>{o.map(q=><option key={q[0]} value={q[0]}>{q[1]}</option>)}</Select></div>;
+export const Ck=({v,on,t})=><label><input type="checkbox" checked={!!v} onChange={e=>on(+e.target.checked)}/> {t}</label>;
+export const Co=({l,v,on})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><input type="color" value={v} onChange={e=>on(e.target.value)}/></div>;
