@@ -1,17 +1,27 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Datenschutz – Liniennetz-Editor</title><style>:root{color-scheme:light dark}body{font:16px/1.6 system-ui,"Segoe UI",sans-serif;max-width:720px;margin:40px auto;padding:0 20px}a{color:#0f6cbd}h2{margin-top:1.6em;font-size:1.15em}</style></head><body>
-<!-- VOR DER VERÖFFENTLICHUNG: Angaben in eckigen Klammern ersetzen und den Text bei Bedarf rechtlich prüfen lassen. -->
 <p><a href="./">← Zurück zum Editor</a></p>
 <h1>Datenschutzerklärung</h1>
 <h2>1. Verantwortlicher</h2>
 <p>Markus Böhm<br>Zerbster Str. 4<br>99091 Erfurt<br>E-Mail: kontakt.transitmapper@outlook.de</p>
 <h2>2. Verarbeitung im Browser</h2>
-<p>Der Liniennetz-Editor läuft vollständig in Ihrem Browser. Pläne, Projektdateien, Bilder und Entwürfe werden ausschließlich lokal verarbeitet und nicht an einen Server übertragen. Es gibt keine Benutzerkonten, keine Cookies, kein Tracking und keine Analysedienste.</p>
+<p>Der Liniennetz-Editor läuft vollständig in Ihrem Browser. Pläne, Projektdateien, Bilder und Entwürfe werden ausschließlich lokal verarbeitet und nicht an einen Server übertragen. Es gibt keine Benutzerkonten, keine Cookies und keine Werbe- oder Profiling-Dienste. Eine reichweitenmessende Statistik ist in Abschnitt 5 beschrieben.</p>
 <h2>3. Lokaler Speicher</h2>
-<p>Die Liste „Zuletzt verwendet“ wird im lokalen Speicher Ihres Browsers (localStorage) abgelegt. Diese Daten verlassen Ihr Gerät nicht und können jederzeit über die Browsereinstellungen gelöscht werden.</p>
+<p>Die Liste „Zuletzt verwendet“ und zuletzt verwendete Farben werden im lokalen Speicher Ihres Browsers (localStorage) abgelegt. Dies dient allein der von Ihnen genutzten Funktion; die Daten verlassen Ihr Gerät nicht und können jederzeit über die Browsereinstellungen gelöscht werden.</p>
 <h2>4. Hosting über GitHub Pages</h2>
 <p>Diese Seite wird über GitHub Pages bereitgestellt (GitHub, Inc., USA, Tochterunternehmen der Microsoft Corporation). Beim Aufruf verarbeitet der Hoster technisch notwendige Daten, insbesondere Ihre IP-Adresse, Datum und Uhrzeit sowie die aufgerufene Datei, um die Seite auszuliefern und die Sicherheit zu gewährleisten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (Bereitstellung und Sicherheit des Angebots). Weitere Informationen finden Sie in der Datenschutzerklärung von GitHub.</p>
-<h2>5. Fehlermeldungen über GitHub</h2>
+<h2>5. Reichweitenmessung mit GoatCounter</h2>
+<p>Diese Seite nutzt den datenschutzfreundlichen Statistikdienst GoatCounter, um zu erfahren, wie oft sie aufgerufen wird. GoatCounter setzt keine Cookies und speichert keine Informationen auf Ihrem Gerät. Beim Aufruf werden die aufgerufene Seite, der Referrer, Browser- und Systeminformationen, die Bildschirmgröße und das Herkunftsland an GoatCounter übertragen. Ihre IP-Adresse wird dabei nicht gespeichert. Die Daten werden nur aggregiert ausgewertet; eine Zuordnung zu einzelnen Personen erfolgt nicht. Der Inhalt Ihrer Pläne wird nicht übertragen.</p>
+<p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse liegt in der Erfassung der Nutzung, um das Angebot bedarfsgerecht weiterzuentwickeln. Das Script wird von gc.zgo.at geladen, dabei erhält der Anbieter technisch bedingt Ihre IP-Adresse.</p>
+<!-- VOR DER VERÖFFENTLICHUNG prüfen: Angaben zu Anbieter, Serverstandort und Auftragsverarbeitung unter https://www.goatcounter.com/help#gdpr bzw. https://www.goatcounter.com/privacy und hier ggf. ergänzen. -->
+<p><b>Widerspruch (Opt-out):</b> Sie können der Messung jederzeit widersprechen. Dann wird in Ihrem Browser ein Merker gesetzt, der die Zählung verhindert.</p>
+<p><button id="gc-out" type="button">Zählung für diesen Browser deaktivieren</button> <span id="gc-state"></span></p>
+<script>
+(function(){var b=document.getElementById("gc-out"),s=document.getElementById("gc-state");
+function show(){try{s.textContent=localStorage.skipgc==="t"?"Zählung ist deaktiviert.":""}catch(e){}}
+b.onclick=function(){try{localStorage.skipgc="t"}catch(e){}show()};show()})();
+</script>
+<h2>6. Fehlermeldungen über GitHub</h2>
 <p>Fehlermeldungen und Vorschläge können über die Issues im öffentlichen GitHub-Repository eingereicht werden. Beiträge dort sind öffentlich sichtbar. Bitte veröffentlichen Sie keine personenbezogenen Daten.</p>
-<h2>6. Ihre Rechte</h2>
+<h2>7. Ihre Rechte</h2>
 <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch und Datenübertragbarkeit sowie das Recht, sich bei einer Datenschutzaufsichtsbehörde zu beschweren.</p>
 </body></html>
