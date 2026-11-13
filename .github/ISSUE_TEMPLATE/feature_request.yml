@@ -1,0 +1,14 @@
+name: Vorschlag
+description: Idee für eine neue Funktion
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idee
+    attributes:
+      label: Was soll der Editor können?
+    validations:
+      required: true
+  - type: textarea
+    id: nutzen
+    attributes:
+      label: Wofür brauchst du das?

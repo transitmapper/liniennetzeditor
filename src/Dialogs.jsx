@@ -14,7 +14,7 @@ function Chip({l,si,k,sid}){
     {pass?<s>{s.name}</s>:s.name}
     {!s.wp&&<><Button {...mini} title="Halt / zeitweise / Durchfahrt" onClick={()=>ed(L=>{const m=L.pass=L.pass||{},t=L.temp=L.temp||{};if(m[sid])delete m[sid];else if(t[sid]){delete t[sid];m[sid]=1}else t[sid]=1})}>{pass?"○":temp?"◐":"●"}</Button>
       <Button {...mini} title="Richtungshalt" onClick={()=>ed(L=>{const d=L.dir=L.dir||{};if(!d[sid])d[sid]=1;else if(d[sid]===1)d[sid]=-1;else delete d[sid]})}>{dv===1?"→":dv===-1?"←":"·"}</Button>
-      <Button {...mini} title="Zwischenhalt in Linienübersicht" onClick={()=>ed(L=>{const m=L.via=L.via||{};if(m[sid])delete m[sid];else m[sid]=1})}>{(l.via||{})[sid]?"⚑":"⚐"}</Button>
+      <Button {...mini} title="Zwischenhalt in Linienübersicht" onClick={()=>ed(L=>{const m=L.via=L.via||{};if(m[sid])delete m[sid];else m[sid]=1})}>{(l.via||{})[sid]?"⚑":"⚐"}</Button><Button {...mini} title="Badge an Endhaltestelle umrandet (Linienfarbe, weiß gefüllt)" onClick={()=>ed(L=>{const m=L.bo=L.bo||{};if(m[sid])delete m[sid];else m[sid]=1})}>{(l.bo||{})[sid]?"▣":"▢"}</Button>
       {(s.alt||[]).length>0&&<Button {...mini} title="Standort" onClick={()=>ed(L=>{const m=L.loc=L.loc||{};let q=(m[sid]||0)+1;if(q>s.alt.length)q=0;m[sid]=q})}>#{((l.loc||{})[sid]||0)+1}</Button>}</>}
     <Button {...mini} onClick={()=>ed(L=>{L.sections[si].splice(k,1)})}>×</Button></span>;
 }

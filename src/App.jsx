@@ -41,14 +41,23 @@ export default function App(){
     <Gp t="Entwurf bearbeiten"><Button onClick={dsg(0,"sym")}>Haltestellensymbol…</Button><Button onClick={dsg(0,"cats")}>Kategorien…</Button><Button onClick={dsg(0,"tpl")}>Textvorlagen…</Button><Button onClick={dsg(0,"ost")}>Zeichenstile…</Button><Button onClick={dsg(0,"leg")}>Legendentexte…</Button><Button onClick={dsg(0,"ann")}>Astanmerkung…</Button></Gp>
     <Gp t="Datei"><Button onClick={()=>dl("entwurf.json","application/json",JSON.stringify(S.design,null,1))}>Entwurf speichern</Button><Button onClick={()=>dRef.current.click()}>Entwurf laden</Button></Gp></>
   };
-  return <FluentProvider theme={dark?webDarkTheme:webLightTheme} style={{height:"100%",display:"grid",gridTemplateRows:"auto auto 1fr"}}>
+  return <FluentProvider theme={dark?webDarkTheme:webLightTheme} style={{height:"100%",display:"grid",gridTemplateRows:"auto auto minmax(0,1fr) auto"}}>
     <div style={{display:"flex",alignItems:"center",padding:"4px 12px 0"}}>
       <TabList selectedValue={tab} onTabSelect={(_,d)=>setTab(d.value)}>{[["start","Start"],["plan","Plan"],["net","Netz"],["draw","Zeichnen"],["design","Entwurf"]].map(([k,n])=><Tab key={k} value={k}>{n}</Tab>)}</TabList><span style={{flex:1}}/>
+      <Button appearance="subtle" onClick={dlg("info")}>Info</Button>
       <Tooltip content="Rückgängig (Strg+Z)" relationship="label"><Button appearance="subtle" icon={<ArrowUndo24Regular/>} disabled={!st.past.length} onClick={st.undo}/></Tooltip>
       <Tooltip content="Wiederholen (Strg+Y)" relationship="label"><Button appearance="subtle" icon={<ArrowRedo24Regular/>} disabled={!st.future.length} onClick={st.redo}/></Tooltip>
       <Button appearance="subtle" icon={<ZoomOut24Regular/>} onClick={()=>st.setZoom(st.zoom-.2)}/><span>{Math.round(st.zoom*100)} %</span><Button appearance="subtle" icon={<ZoomIn24Regular/>} onClick={()=>st.setZoom(st.zoom+.2)}/></div>
     <div style={{display:"flex",padding:"8px 0",overflowX:"auto",borderTop:"1px solid var(--colorNeutralStroke2)",borderBottom:"1px solid var(--colorNeutralStroke2)",minHeight:72}}>{panels[tab]}</div>
-    <Canvas/><LinesDialog/><CheckDialog/><PlanDialog/><StopDialog/><DesignDialog/><DrawDialog/><Pop/><Wizard/>
+    <Canvas/>
+    <div style={{padding:"3px 12px",fontSize:12,opacity:.8,borderTop:"1px solid var(--colorNeutralStroke2)",display:"flex",gap:14}}><a href="impressum.html" target="_blank" rel="noreferrer">Impressum</a><a href="datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a><a href="#" onClick={e=>{e.preventDefault();set({dlg:"info"})}}>Info</a><span style={{flex:1}}/><span>Version 1.1</span></div>
+    <Shell open={st.dlg==="info"} title="Liniennetz-Editor · Info">
+      <p>Version 1.1. Editor für Liniennetzpläne im Browser. Alle Daten bleiben auf deinem Rechner.</p>
+      <p><b>Sprache:</b> Der Editor ist derzeit nur auf Deutsch verfügbar.</p>
+      <p><b>Fehler gefunden oder eine Idee?</b> Bitte melde sie auf GitHub: <a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose" target="_blank" rel="noreferrer">Fehler melden oder Funktion vorschlagen</a>. Hilfreich sind die Schritte zum Nachstellen und möglichst eine Projektdatei oder ein Screenshot (bitte ohne personenbezogene Daten).</p>
+      <p><b>Hinweis zu KI:</b> Dieses Programm wurde mit Unterstützung von KI (Claude von Anthropic) entwickelt und vom Autor geprüft und getestet.</p>
+      <p><a href="https://github.com/transitmapper/liniennetzeditor" target="_blank" rel="noreferrer">Quellcode auf GitHub</a> · Lizenz: MIT · <a href="impressum.html" target="_blank" rel="noreferrer">Impressum</a> · <a href="datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a></p></Shell>
+    <LinesDialog/><CheckDialog/><PlanDialog/><StopDialog/><DesignDialog/><DrawDialog/><Pop/><Wizard/>
     <Shell side open={st.dlg==="bg"} title="Hintergrundbild (Pause, nicht im Export)"><R><Button onClick={()=>bgRef.current.click()}>{bg?"Ersetzen":"Bild laden"}…</Button>{bg&&<Button onClick={()=>set({bg:null})}>Entfernen</Button>}</R>
       {bg&&<R>{[["o","Deckkraft %",0],["s","Größe %",5],["x","X (px)",-9999],["y","Y (px)",-9999]].map(([f,l])=><Tx key={f} l={l} t="number" w={90} v={bg[f]} on={v=>set({bg:{...bg,[f]:v}})}/>)}</R>}<p style={{opacity:.7,fontSize:12}}>Das Bild wird nicht in der Projektdatei gespeichert.</p></Shell>
     <input ref={bgRef} type="file" accept="image/*" hidden onChange={e=>{const f=e.target.files[0];if(f)set({bg:{url:URL.createObjectURL(f),o:35,s:100,x:0,y:0}});e.target.value=""}}/>

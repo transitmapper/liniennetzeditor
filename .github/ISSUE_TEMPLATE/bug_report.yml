@@ -1,0 +1,26 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie erwartet
+labels: [bug]
+body:
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert?
+      description: Bitte beschreibe den Fehler und was du erwartet hast.
+    validations:
+      required: true
+  - type: textarea
+    id: schritte
+    attributes:
+      label: Schritte zum Nachstellen
+      placeholder: "1. ...\n2. ...\n3. ..."
+  - type: input
+    id: browser
+    attributes:
+      label: Browser und Version
+      placeholder: z. B. Firefox 130, Chrome 128
+  - type: textarea
+    id: datei
+    attributes:
+      label: Projektdatei (optional)
+      description: Hänge die .json-Datei per Drag & Drop an, mit der sich der Fehler nachstellen lässt. Bitte keine privaten Daten.

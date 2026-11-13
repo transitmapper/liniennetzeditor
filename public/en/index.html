@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liniennetz-Editor – draw transit maps for free in your browser</title>
+<meta name="description" content="Free browser-based editor for transit network maps: place stops on a grid, assign lines, export as SVG, PNG or PDF. A replacement for Microsoft Publisher.">
+<link rel="canonical" href="https://transitmapper.github.io/liniennetzeditor/en/">
+<link rel="alternate" hreflang="de" href="https://transitmapper.github.io/liniennetzeditor/">
+<link rel="alternate" hreflang="en" href="https://transitmapper.github.io/liniennetzeditor/en/">
+<link rel="alternate" hreflang="x-default" href="https://transitmapper.github.io/liniennetzeditor/">
+<link rel="icon" href="../favicon.svg">
+<meta property="og:type" content="website"><meta property="og:title" content="Liniennetz-Editor – draw transit maps for free in your browser">
+<meta property="og:description" content="Free browser-based editor for transit network maps: place stops on a grid, assign lines, export as SVG, PNG or PDF. A replacement for Microsoft Publisher."><meta property="og:url" content="https://transitmapper.github.io/liniennetzeditor/en/">
+<meta property="og:image" content="https://transitmapper.github.io/liniennetzeditor/og-image.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../landing.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Liniennetz-Editor","applicationCategory":"DesignApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"url":"https://transitmapper.github.io/liniennetzeditor/","inLanguage":["de","en"],"license":"https://opensource.org/licenses/MIT"}</script>
+<script data-goatcounter="https://liniennetzeditor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head><body>
+<header class="kopf">
+<a class="marke" href="./"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M2 24H16L26 14H38" fill="none" stroke="#d62828" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="5" fill="#fff" stroke="#1c2024" stroke-width="3"/></svg>Liniennetz-Editor</a>
+<nav><a class="text" href="#beispiele">Examples</a><a class="text" href="#funktionen">Features</a>
+<span class="sprache"><a href="../" hreflang="de" lang="de" >DE</a> <a href="./" hreflang="en" lang="en" aria-current="page">EN</a></span>
+<a class="knopf" href="../app/">Open the editor</a></nav>
+</header>
+<section class="hero">
+<div><h1>Draw transit maps without learning a graphics program</h1><p>You describe the network and place stops on a grid. The editor works out connections, rounded corners, parallel lines, stop symbols and the key by itself. Free, in your browser, no account.</p>
+<div class="aktionen"><a class="knopf" href="../app/">Open the editor</a><a class="knopf leise" href="#beispiele">See examples</a></div>
+<small>Built because Microsoft Publisher was discontinued at the end of October 2026. The editor interface is currently German-only.</small></div>
+<svg class="netz" viewBox="0 0 520 400" role="img" aria-label="">
+<defs><pattern id="r" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.6" class="raster"/></pattern></defs>
+<rect width="520" height="400" fill="url(#r)"/>
+<path id="rot" class="l" pathLength="1" stroke="#d62828" d="M20 320H130Q150 320 164 306L216 254Q230 240 250 240H500"/>
+<path class="l l2" pathLength="1" stroke="#1d6fb8" d="M20 90H120Q140 90 154 104L216 166Q230 180 250 180H330Q350 180 364 194L420 250Q434 264 454 264H500"/>
+<path class="l l3" pathLength="1" stroke="#2a9d4a" d="M20 370H300Q320 370 334 356L360 330Q374 316 394 316H500"/>
+<g>
+<circle class="h" cx="80" cy="320" r="11" style="animation-delay:1.1s"/>
+<circle class="h" cx="250" cy="240" r="11" style="animation-delay:1.5s"/>
+<circle class="h" cx="350" cy="240" r="11" style="animation-delay:1.8s"/>
+<circle class="h" cx="50" cy="90" r="11" style="animation-delay:1.3s"/>
+<circle class="h" cx="120" cy="90" r="11" style="animation-delay:1.6s"/>
+<circle class="h" cx="250" cy="180" r="11" style="animation-delay:1.9s"/>
+<circle class="h" cx="330" cy="180" r="11" style="animation-delay:2.1s"/>
+<circle class="h" cx="60" cy="370" r="11" style="animation-delay:1.7s"/>
+<circle class="h" cx="180" cy="370" r="11" style="animation-delay:2s"/>
+<circle class="h" cx="394" cy="316" r="11" style="animation-delay:2.3s"/>
+<circle class="h" cx="470" cy="316" r="11" style="animation-delay:2.5s"/>
+<circle class="h u" cx="410" cy="240" r="15" style="animation-delay:2.4s"/>
+</g>
+<circle class="fahrt" r="7"><animateMotion dur="9s" begin="2.6s" repeatCount="indefinite" path="M20 320H130Q150 320 164 306L216 254Q230 240 250 240H500"/></circle>
+</svg>
+</section>
+<main class="strecke"><div class="spur" aria-hidden="true"></div>
+<section class="halt"><h2>Why this editor exists</h2><p>For many hobby planners, Microsoft Publisher was the tool of choice: simple enough for quick network maps, without the overhead of InDesign or Affinity. It was discontinued at the end of October 2026.</p><p>There was no fitting replacement, so this editor was built to do exactly that job, by someone who plans transit networks as a hobby.</p></section>
+<section class="halt"><h2>How a map comes together</h2>
+<ol class="schritte">
+<li><span class="pille p1">1</span><div><b>Describe the network</b>Create stops, give lines a colour and category, assign the stops each line serves.</div></li>
+<li><span class="pille p2">2</span><div><b>Place the stops</b>Set them on the grid. The editor connects them with 0°, 45° and 90° segments and rounds the bends.</div></li>
+<li><span class="pille p3">3</span><div><b>Export</b>Output as SVG, PNG or PDF. The project itself is saved as a JSON file on your computer.</div></li>
+</ol><svg class="demo" viewBox="0 0 300 170" role="img" aria-label="" width="100%">
+<defs><pattern id="g" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1.6" class="raster"/></pattern></defs>
+<rect width="300" height="170" fill="url(#g)"/>
+<path class="l" pathLength="1" d="M45 135H135Q150 135 160 125L230 55"/>
+<g class="b"><circle class="h" cx="45" cy="135" r="11"/><text class="name" x="45" y="164" text-anchor="middle">Erfurt</text></g>
+<g class="b b2"><circle class="h" cx="230" cy="55" r="11"/><text class="name" x="230" y="32" text-anchor="middle">Weimar</text></g>
+</svg></section>
+<section class="halt" id="beispiele"><h2>Maps made with the editor</h2><p>Click a map to open it full size as SVG.</p><div class="plaene"><figure class="plan reveal" style="--c:#d62828"><a href="../plans/akkunetz.svg" target="_blank" rel="noopener"><img src="../plans/akkunetz.svg" alt="Mittelthüringer Akkunetz" loading="lazy"></a><figcaption><b>Mittelthüringer Akkunetz</b>Made with Liniennetz-Editor.</figcaption></figure><figure class="plan reveal" style="--c:#1d6fb8"><a href="../plans/ostthueringen.svg" target="_blank" rel="noopener"><img src="../plans/ostthueringen.svg" alt="Ostthüringennetz" loading="lazy"></a><figcaption><b>Ostthüringennetz</b>Made with Liniennetz-Editor.</figcaption></figure><figure class="plan reveal" style="--c:#2a9d4a"><a href="../plans/saale-suedharz.svg" target="_blank" rel="noopener"><img src="../plans/saale-suedharz.svg" alt="Saale-Thüringen-Südharz-Netz" loading="lazy"></a><figcaption><b>Saale-Thüringen-Südharz-Netz</b>Made with Liniennetz-Editor.</figcaption></figure></div></section>
+<section class="halt" id="funktionen"><h2>What it can do</h2><ul class="funktionen"><li>Lines with trunk, branches and loops</li><li>Parallel lines are bundled, lane order is adjustable</li><li>Split stops and waypoints</li><li>Direction-only stops, temporary service and pass-through stops</li><li>Key and line overview are generated automatically</li><li>Rivers, borders and areas as drawing objects, with labels</li><li>Text styles and designs you can save and reuse</li><li>Automatic label placement with overlap check</li><li>CSV import and background image as tracing template</li><li>Undo and redo, selection mode, export and import parts of a network</li></ul></section>
+<section class="halt"><h2>Free and local</h2><p>The editor runs entirely in your browser. There is no sign-up and no server that sees your maps. Projects are saved as files on your computer.</p><p>The source code is on GitHub under the MIT licence. Report bugs and ideas there as an issue. <a href="https://github.com/transitmapper/liniennetzeditor">Source code on GitHub</a></p></section>
+<section class="halt end"><h2>Terminus: get started</h2><div class="badges"><span class="pille p1">RE 1</span><span class="pille p2">RE 2</span><span class="pille p3">S 1</span></div><p>The sample network in the editor shows in a minute how everything fits together.</p><p><a class="knopf" href="../app/">Open the editor</a></p></section>
+</main>
+<footer class="fuss"><a href="../impressum.html">Legal notice (German)</a><a href="../datenschutz.html">Privacy (German)</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Report a bug</a><span>MIT licence</span></footer>
+<script src="../landing.js"></script>
+</body></html>

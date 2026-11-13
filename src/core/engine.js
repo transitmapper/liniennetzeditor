@@ -3,9 +3,9 @@
 
 const G=32, RAD=18, KEY="liniennetz-v2";
 const DIRS={N:[0,-1],NE:[1,-1],E:[1,0],SE:[1,1],S:[0,1],SW:[-1,1],W:[-1,0],NW:[-1,-1]};
-const TN={stop:"Station normal",end:"Endstation",h1:"Überschrift 1",h2:"Überschrift 2",sub:"Untertitel",text:"Normaler Text und Legende",en:"Übersetzung der Legendenüberschriften",water:"Gewässerbeschriftung",area:"Gebietsbeschriftung (Ländernamen)",badge:"Text im Linienbadge",leg:"Legendentext"};
+const TN={stop:"Station normal",end:"Endstation",h1:"Überschrift 1",h2:"Überschrift 2",sub:"Untertitel",text:"Normaler Text und Legende",en:"Übersetzung der Legendenüberschriften",water:"Gewässerbeschriftung",area:"Gebietsbeschriftung (Ländernamen)",badge:"Text im Linienbadge",leg:"Legendentext",arrow:"Pfeilspitzenbeschriftung"};
 const T=(size,b=0,color="#111111")=>({font:"Segoe UI",size,color,b,i:0,u:0});
-const defDesign=()=>({cats:[{id:"c1",name:"Häufig bedient",w:8,dash:""},{id:"c2",name:"Selten bedient",w:5,dash:"dash"}],tpl:{stop:T(14),end:T(14,1),h1:T(30,1),h2:T(22,1),sub:T(16,0,"#555555"),text:T(13),en:{...T(15,0,"#777777"),i:1},water:{...T(14,0,"#4a86b8"),i:1},area:{...T(15,1,"#8a8a8a")},badge:T(10,1),leg:T(13)},ostyles:[{id:"o1",name:"Fluss",color:"#7ab8e8",w:6,dash:"",smooth:0,area:0},{id:"o2",name:"Ländergrenze",color:"#9a9a9a",w:3,dash:"dash",smooth:0,area:0},{id:"o3",name:"Bahnstrecke (nicht bedient)",color:"#6b6b6b",w:5,dash:"",smooth:0,area:0}]});
+const defDesign=()=>({cats:[{id:"c1",name:"Häufig bedient",w:8,dash:""},{id:"c2",name:"Selten bedient",w:5,dash:"dash"}],tpl:{stop:T(14),end:T(14,1),h1:T(30,1),h2:T(22,1),sub:T(16,0,"#555555"),text:T(13),en:{...T(15,0,"#777777"),i:1},water:{...T(14,0,"#4a86b8"),i:1},area:{...T(15,1,"#8a8a8a")},badge:T(10,1),leg:T(13),arrow:T(14)},ostyles:[{id:"o1",name:"Fluss",color:"#7ab8e8",w:6,dash:"",smooth:0,area:0},{id:"o2",name:"Ländergrenze",color:"#9a9a9a",w:3,dash:"dash",smooth:0,area:0},{id:"o3",name:"Bahnstrecke (nicht bedient)",color:"#6b6b6b",w:5,dash:"",smooth:0,area:0}]});
 const DT=defDesign().tpl;
 const empty=d=>({design:d||defDesign(),title:{on:1,text:"Liniennetz",sub:"Regionalverkehr",x:1,y:1},legend:{on:1,x:44,y:2},stops:[],lines:[]});
 function load(){try{const s=JSON.parse(localStorage[KEY]);return s&&s.design?s:empty()}catch(e){return empty()}}
@@ -251,30 +251,30 @@ function stopSvg(n,ui,ends,lab){
   if(lab){
     const t0=S.design.tpl[ends[n.sid]?"end":"stop"], tp={...t0,b:(t0.b||s.bold)?1:0};
     const d=DIRS[s.label||"E"], L=Math.hypot(d[0],d[1]), dd={x:d[0]/L,y:d[1]/L}, ew=d[1]===0&&d[0]!==0, ax=d[0]>0?"start":d[0]<0?"end":"middle";
-    const el=sortLines(ends[n.sid]||[]), fs=TP("badge").size, bh=fs+7, bw=l=>Math.max(bh*1.4,l.name.length*fs*.62+10), per=S.bpr||6, rows=[];
+    const el=sortLines([...(ends[n.sid]||[]),...(s.badges||[]).map(line).filter(l=>l&&!(ends[n.sid]||[]).includes(l))]), fs=TP("badge").size, bh=fs+7, bw=l=>Math.max(bh*1.4,l.name.length*fs*.62+10), per=S.bpr||6, rows=[];
     for(let i=0;i<el.length;i+=per) rows.push(el.slice(i,i+per));
-    const bB=rows.length?rows.length*(bh+3)-3:0, nh=tp.size*1.2;
+    const bB=rows.length?rows.length*(bh+3)-3:0, nl=brk(s.name).length, nh=tp.size*1.2*nl;
     const base=box?Math.min((box.x1-box.x0)/2/(Math.abs(dd.x)||1e-6),(box.y1-box.y0)/2/(Math.abs(dd.y)||1e-6)):R+Math.abs(dd.x*a.x+dd.y*a.y)*half;
     let dist=base+(d[0]===0?14:7)+(s.ld||0)*gl;
-    const under=s.bu!=null?!!s.bu:!!S.bUnder; if(bB){if(d[1]>0&&!under)dist+=(bB+2)/dd.y;else if(d[1]<0&&under)dist+=(bB+2)/(-dd.y)}
+    dist+=(nl-1)*tp.size*.6*Math.abs(dd.y); const under=s.bu!=null?!!s.bu:!!S.bUnder; if(bB){if(d[1]>0&&!under)dist+=(bB+2)/dd.y;else if(d[1]<0&&under)dist+=(bB+2)/(-dd.y)}
     const tx=mid.x+dd.x*dist; let ty=mid.y+dd.y*dist, by=under?ty+nh/2+2:ty-nh/2-2-bB;
     if(bB&&ew){ // Beschriftung links/rechts: Badges optional unter dem Namen, Block optional zur Haltestelle zentriert
       const H=nh+2+bB;
       if(under){if(S.bCenter)ty=mid.y-H/2+nh/2;by=ty+nh/2+2}
       else if(S.bCenter){ty=mid.y+H/2-nh/2;by=ty-nh/2-2-bB}
     }
-    o+=`<text x="${tx}" y="${ty}" text-anchor="${ax}" dominant-baseline="middle" ${ts(tp)}>${esc(s.name)}${FN[s.id]?`<tspan dy="-0.5em" font-size="${Math.round(tp.size*.7)}">${FN[s.id]}</tspan>`:""}</text>`;
+    o+=mlines(tx,ty,brk(s.name),tp.size*1.2,`text-anchor="${ax}" dominant-baseline="middle" ${ts(tp)}`,FN[s.id]?`<tspan dy="-0.5em" font-size="${Math.round(tp.size*.7)}">${FN[s.id]}</tspan>`:"");
     rows.forEach((rw,ri)=>{
       const tot=rw.reduce((t,l)=>t+bw(l)+3,-3), y=by+ri*(bh+3);
       let bx=ax==="start"?tx:ax==="end"?tx-tot:tx-tot/2;
-      rw.forEach(l=>{const w=bw(l);o+=`<rect x="${bx}" y="${y}" width="${w}" height="${bh}" rx="${l.shape==="rect"?2:bh/2}" fill="${l.color}"/><text x="${bx+w/2}" y="${y+bh/2}" text-anchor="middle" dominant-baseline="central" font-family="${ff(TP("badge").font)}" font-size="${fs}" font-weight="${TP("badge").b?700:400}" fill="${ink(l.color)}">${esc(l.name)}</text>`;bx+=w+3});
+      rw.forEach(l=>{const w=bw(l),oo=!!(l.bo||{})[n.sid];o+=(oo?`<rect x="${bx+1}" y="${y+1}" width="${w-2}" height="${bh-2}" rx="${l.shape==="rect"?1:(bh-2)/2}" fill="#fff" stroke="${l.color}" stroke-width="2"/>`:`<rect x="${bx}" y="${y}" width="${w}" height="${bh}" rx="${l.shape==="rect"?2:bh/2}" fill="${l.color}"/>`)+`<text x="${bx+w/2}" y="${y+bh/2}" text-anchor="middle" dominant-baseline="central" font-family="${ff(TP("badge").font)}" font-size="${fs}" font-weight="${TP("badge").b?700:400}" fill="${oo?l.color:ink(l.color)}">${esc(l.name)}</text>`;bx+=w+3});
     });
   }
   return `<g data-s="${n.id}" style="${ui?"cursor:move":""}">${o}</g>`;
 }
 function routeTxt(l){
   if(l.route) return l.route;
-  const nm=id=>(stop(id)||{}).name||"";
+  const nm=id=>((stop(id)||{}).name||"").replace(/\n/g," ");
   return l.sections.filter(c=>c.length>1).map((c,i)=>{const v=c.slice(1,-1).filter(x=>(l.via||{})[x]).map(nm),rg=i===0&&l.closed;return [nm(c[0]),...v,...(rg?[]:[nm(c[c.length-1])])].join(" – ")+(rg?" (Ringlinie)":"")}).join("; ");
 }
 const dashOf=d=>d==="dash"?"14 9":d==="dot"?"1 10":"";
@@ -287,7 +287,7 @@ const rnd=(P,cl)=>P.map((v,i)=>{
 });
 function objSvg(ui){ // Zeichenobjekte (Flüsse, Grenzen, freie Strecken)
   let o="";
-  (S.objs||[]).forEach(b=>{
+  objOrder().forEach(b=>{
     const st=OSt().find(x=>x.id===b.style)||OSt()[0], P=b.pts.map(p=>({x:p.x*G,y:p.y*G})); if(P.length<2) return;
     const dsh=b.dash==="none"?"":b.dash||st.dash, w=st.w, d=pathD(rnd(P,!!st.area),!!st.area);
     o+=`<path d="${d}" fill="${st.area?st.color:"none"}" fill-opacity="${st.area?.5:1}" stroke="${st.color}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="${dsh==="dash"?"butt":"round"}"${dashOf(dsh)?` stroke-dasharray="${dashOf(dsh)}"`:""}/>`;
@@ -295,8 +295,8 @@ function objSvg(ui){ // Zeichenobjekte (Flüsse, Grenzen, freie Strecken)
       const q=P[P.length-1], p=P[P.length-2], k=Math.max(8,w*1.8), ang=Math.atan2(q.y-p.y,q.x-p.x), off=w+2, tx=q.x+Math.cos(ang)*off, ty=q.y+Math.sin(ang)*off;
       o+=`<path d="M0 0L${-2*k} ${-k}L${-2*k} ${k}Z" transform="translate(${tx} ${ty}) rotate(${ang*180/Math.PI})" fill="${st.color}"/>`;
       if(b.alabel){ // Beschriftung der Spitze, Ausrichtung wie bei einer Haltestelle
-        const dr=DIRS[b.apos||"E"], Lh=Math.hypot(dr[0],dr[1]), tp=TP("stop");
-        o+=`<text x="${tx+dr[0]/Lh*10}" y="${ty+dr[1]/Lh*(10+tp.size*.4)}" text-anchor="${dr[0]>0?"start":dr[0]<0?"end":"middle"}" dominant-baseline="middle" ${ts(tp)}>${esc(b.alabel)}</text>`;
+        const dr=DIRS[b.apos||"E"], Lh=Math.hypot(dr[0],dr[1]), tp=TP("arrow"), al=brk(b.alabel), alh=tp.size*1.2;
+        o+=mlines(tx+dr[0]/Lh*10,ty+dr[1]/Lh*(10+tp.size*.4+(al.length-1)*alh/2),al,alh,`text-anchor="${dr[0]>0?"start":dr[0]<0?"end":"middle"}" dominant-baseline="middle" ${ts(tp)}`);
       }
     }
     o+=objLabSvg(b,P,st);
@@ -365,14 +365,13 @@ function extras(){
       o+=`<path d="M${x} ${y1}h40" stroke="${c0}" stroke-width="5" fill="none"/><path d="M${x} ${y2}h40" stroke="${c1}" stroke-width="5" fill="none"/><polyline points="${pz}" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/><polyline points="${pz}" fill="none" stroke="#222" stroke-width="1.8" stroke-linejoin="round"/><text x="${x+54}" y="${y+h/2}" ${ts(TT)} dominant-baseline="central">${esc(LT("zig"))}</text>`;
       y+=h+6;
     }
-    const usedO=new Set((S.objs||[]).map(b=>b.style));
+    const usedO=new Set((S.objs||[]).filter(b=>!b.noLeg).map(b=>b.style));
     OSt().filter(st=>usedO.has(st.id)).sort((a,b)=>b.w-a.w).forEach(st=>{
       const h=Math.max(26,st.w+14);
       o+=(st.area?`<rect x="${x}" y="${y+h/2-8}" width="40" height="16" fill="${st.color}" fill-opacity=".5"/>`:`<path d="M${x} ${y+h/2}h40" stroke="${st.color}" stroke-width="${st.w}" fill="none" stroke-linecap="${st.dash==="dash"?"butt":"round"}"${dashOf(st.dash)?` stroke-dasharray="${dashOf(st.dash)}"`:""}/>`)+`<text x="${x+54}" y="${y+h/2}" ${ts(TT)} dominant-baseline="central">${esc(st.name)}</text>`;
       y+=h;
     });
-    if(S.legend.ov!==0&&S.lines.length){
-      y+=T2.size*.7; o+=head(x,y,LT("list"),tr.list); y+=T2.size*1.8;
+    const xo=x,sepL=!!S.legend.sep;let ye=y;if(S.legend.ov!==0&&S.lines.length){const x=sepL?(S.legend.lx==null?xo/G:S.legend.lx)*G:xo;let y=sepL?(S.legend.ly==null?12:S.legend.ly)*G:ye;y+=T2.size*.7; o+=head(x,y,LT("list"),tr.list); y+=T2.size*1.8;
       const fs=TP("badge").size, bh=fs+6, bw=l=>Math.max(bh*1.5,l.name.length*fs*.62+10), cw=Math.max(...S.lines.map(bw));
       sortLines(S.lines).forEach(l=>{
         const w=bw(l), h=Math.max(bh,TT.size);
@@ -380,7 +379,9 @@ function extras(){
         o+=`<text x="${x+cw+10}" y="${y+h/2}" dominant-baseline="central" ${ts(TT)}>${esc(routeTxt(l))}</text>`;
         y+=h+8;
       });
+      if(!sepL)ye=y;
     }
+    y=ye;
     const fl=Object.entries(FN).sort((a,b)=>a[1]-b[1]);
     if(fl.length){y+=T2.size*.7;o+=head(x,y,LT("notes"),tr.notes);y+=T2.size*1.8;fl.forEach(([i,n])=>{o+=tx(TT,x,y,n+"  "+stop(i).fn);y+=TT.size+10})}
   }
@@ -390,11 +391,11 @@ function svgMarkup(ui){
   const W=CW()*G, H=CH()*G, B=build(ui); info=B.I; LB=B; FN=fnMap();
   let out="";
   if(ui) out+=`<defs><pattern id="gd" x="-16" y="-16" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.2" fill="#ccc"/></pattern></defs><rect x="-16" y="-16" width="${W+32}" height="${H+32}" fill="url(#gd)"/>`;
-  out+=objSvg(ui);
+  out+=imgSvg(ui,0);out+=objSvg(ui);
   if(ui&&hl&&hl.l)B.paths.filter(p=>p.lid===hl.l).forEach(p=>out+=`<path d="${p.d}" fill="none" stroke="#ffc400" stroke-opacity=".55" stroke-width="${p.w+14}" stroke-linecap="round" stroke-linejoin="round"/>`);
   [1,0].forEach(ol=>B.paths.forEach(p=>{ // erst alle weißen Umrandungen (1 px je Seite), dann die Linien
     const dd=p.dash==="dash"?"14 9":p.dash==="dot"?"1 10":"";
-    out+=`<path d="${p.d}" fill="none" stroke="${ol?"#fff":p.color}" stroke-width="${p.w+(ol?2:0)}" stroke-linejoin="round" stroke-linecap="${p.dash==="dash"?"butt":"round"}"${dd?` stroke-dasharray="${dd}"`:""}/>`;
+    out+=`<path d="${p.d}" fill="none" stroke="${ol?"#fff":p.color}" stroke-width="${p.w+(ol?4:0)}" stroke-linejoin="round" stroke-linecap="${p.dash==="dash"?"butt":"round"}"${dd?` stroke-dasharray="${dd}"`:""}/>`;
   }));
   out+=eZig(B);out+=eBadges(B);const gw=Math.max(...S.design.cats.map(c=>c.w))+3;
   if(ui) Object.entries(B.hits).forEach(([k,h])=>out+=`<polyline data-e="${k}"${h.m?' data-m="1"':''} points="${h.p}" fill="none" stroke="transparent" stroke-width="${14+((B.lanes[k]||[]).length)*gw}" style="cursor:pointer"/>`);
@@ -404,12 +405,12 @@ function svgMarkup(ui){
   S.stops.forEach(s=>nodes(s).filter(n=>n.x!=null&&!(ui&&B.hid&&!s.wp&&!B.used.has(s.id))&&(s.wp||!(B.thru.has(n.id)&&!B.I[n.id]))).forEach((n,i)=>{
     if(s.wp){if(ui){const x=n.x*G,y=n.y*G;out+=`<g data-s="${n.id}" style="cursor:move"><path d="M${x-7} ${y}L${x} ${y-7}L${x+7} ${y}L${x} ${y+7}Z" fill="#fff" stroke="${sel===n.id?"#0f6cbd":"#999"}" stroke-width="2"/></g>`}return}
     out+=stopSvg(n,ui,B.ends,i===0)}));
-  out+=freeSvg(ui);
+  out+=imgSvg(ui,1);out+=freeSvg(ui)+imgHandles(ui);
   if(ui&&hl&&hl.s){const p=posOf(hl.s);if(p&&p.x!=null)out+=`<circle cx="${p.x*G}" cy="${p.y*G}" r="30" fill="none" stroke="#ffc400" stroke-width="5"><animate attributeName="r" values="14;34;14" dur="1s" repeatCount="2"/></circle>`}
   if(ui) out+=selSvg();
   out+=extras();
   const z=ui?zoom:1;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W*z}" height="${H*z}"><rect width="${W}" height="${H}" fill="#fff"/>${out}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${W} ${H}" width="${W*z}" height="${H*z}"><rect width="${W}" height="${H}" fill="#fff"/>${out}</svg>`;
 }
 function demo(){
   const P=[["Nordhausen",6,4],["Sondershausen",12,8],["Erfurt",20,12],["Weimar",26,12],["Jena",32,8],["Gera",40,8],["Gotha",12,16],["Eisenach",6,20],["Arnstadt",20,18],["Ilmenau",26,18]];
@@ -458,6 +459,9 @@ function objLabSvg(b,P,st){
   if(!L)return"";
   let o="";
   labs.forEach(lb=>{
+    if(lb.side==="mid"){const R2=(st.area||same)?Q:[...Q,Q[0]];let cx=0,cy=0,a2=0;for(let i=0;i<R2.length-1;i++){const f=R2[i].x*R2[i+1].y-R2[i+1].x*R2[i].y;a2+=f;cx+=(R2[i].x+R2[i+1].x)*f;cy+=(R2[i].y+R2[i+1].y)*f}
+      const ok=Math.abs(a2)>1e-6,mx=ok?cx/(3*a2):R2.reduce((t,p)=>t+p.x,0)/R2.length,my=ok?cy/(3*a2):R2.reduce((t,p)=>t+p.y,0)/R2.length,tm=TP(lb.tpl||"water");
+      o+=`<g${lb.rot?` transform="rotate(${lb.rot} ${mx} ${my})"`:""}>${mlines(mx,my,brk(lb.text),tm.size*1.2,`text-anchor="middle" dominant-baseline="middle" ${ts(tm)} paint-order="stroke" stroke="#fff" stroke-width="3" stroke-linejoin="round"`)}</g>`;return}
     const tp=TP(lb.tpl||"water"), sd=lb.side||"on", sg=sd==="on"?0:(sd==="in"?1:-1)*(cl&&A<0?-1:1), off=sg*(st.w/2+tp.size*.7+2), ds=[], p0=(lb.pos==null?50:lb.pos)/100*L;
     if(lb.gap>0){const step=lb.gap*G;for(let d=p0%step;d<=L&&ds.length<300;d+=step)ds.push(d)}else ds.push(p0);
     ds.forEach(d0=>{
@@ -500,3 +504,12 @@ export{s45c,catOf,OSt,obj};export const getLB=()=>LB;
 export{TN,LT,TR,TP};
 
 export{labelsOf};
+
+const brk=s=>{const L=String(s).split("\n").map(x=>x.replace(/\s+$/,""));return L.map((a,i)=>i<L.length-1&&/[A-Za-zÀ-ÿ0-9]$/.test(a)&&/^[A-Za-zÀ-ÿ0-9]/.test(L[i+1])?a+"-":a)};
+const mlines=(x,y,L,lh,at,first="")=>L.map((t,i)=>`<text x="${x}" y="${y+(i-(L.length-1)/2)*lh}" ${at}>${esc(t)}${i===0?first:""}</text>`).join("");
+function objOrder(){const bk=b=>(b.back||(S.areasBack&&(OSt().find(x=>x.id===b.style)||{}).area))?0:1;return [...(S.objs||[])].sort((p,q)=>bk(p)-bk(q))}
+function imgSvg(ui,front){return (S.imgs||[]).filter(i=>i.src&&!!i.front===!!front).map(i=>`<image href="${i.src}" xlink:href="${i.src}" x="${i.x*G}" y="${i.y*G}" width="${i.w*G}" height="${i.h*G}" preserveAspectRatio="none" opacity="${(i.op==null?100:i.op)/100}"/>`).join("")}
+function imgHandles(ui){if(!ui||!selX||selX.t!=="i")return"";const i=(S.imgs||[]).find(q=>q.id===selX.id);if(!i)return"";
+  return `<rect x="${i.x*G}" y="${i.y*G}" width="${i.w*G}" height="${i.h*G}" fill="none" stroke="#0f6cbd" stroke-dasharray="6 4" stroke-width="2" pointer-events="none"/><circle data-h="i:${i.id}:0" cx="${i.x*G}" cy="${i.y*G}" r="7" fill="#0f6cbd" style="cursor:move"/><circle data-h="i:${i.id}:1" cx="${(i.x+i.w)*G}" cy="${(i.y+i.h)*G}" r="7" fill="#fff" stroke="#0f6cbd" stroke-width="2.5" style="cursor:nwse-resize"/>`}
+const TNs=()=>({...TN,...(S.design.tplNames||{})});
+export{TNs};

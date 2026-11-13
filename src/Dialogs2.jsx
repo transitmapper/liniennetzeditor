@@ -1,8 +1,15 @@
 import React,{useState} from "react";
-import {Button,TabList,Tab} from "@fluentui/react-components";
+import {Button,TabList,Tab,Label} from "@fluentui/react-components";
 import {useStore} from "./store.js";
-import {Shell,R,Tx,Sl,Ck,Co} from "./ui.jsx";
-import {setS,SP,TP,TN,LT,TR,OSt,defDesign,newId,pageSync,DIRS} from "./core/engine.js";
+import {Shell,R,Tx,Sl,Ck,Co,Ta} from "./ui.jsx";
+import {setS,SP,TP,TN,LT,TR,OSt,defDesign,newId,pageSync,DIRS,getLB,TNs} from "./core/engine.js";
+function BadgeEditor({id}){
+  const {S,edit}=useStore(),s=S.stops.find(x=>x.id===id),ends=((getLB().ends||{})[id]||[]).map(l=>l.id),ids=[...ends,...(s.badges||[]).filter(i=>!ends.includes(i))],ln=i=>S.lines.find(l=>l.id===i);
+  const bo=i=>edit(D=>{const L=D.lines.find(x=>x.id===i),m=L.bo=L.bo||{};if(m[id])delete m[id];else m[id]=1});
+  return <><Label size="small">Linienbadges an dieser Haltestelle (an Endhaltestellen automatisch)</Label>
+    {ids.map(i=>{const l=ln(i);return l?<R key={i}><span style={{background:l.color,color:"#fff",borderRadius:l.shape==="rect"?3:99,padding:"2px 12px"}}>{l.name}</span><Ck v={(l.bo||{})[id]} on={()=>bo(i)} t="umrandet (Linienfarbe, weiß gefüllt)"/>{!ends.includes(i)&&<Button size="small" onClick={()=>edit(D=>{const q=D.stops.find(x=>x.id===id);q.badges=(q.badges||[]).filter(z=>z!==i)})}>Entfernen</Button>}</R>:null})}
+    <Sl l="Linienbadge hinzufügen" v="" on={v=>v&&edit(D=>{const q=D.stops.find(x=>x.id===id);q.badges=[...(q.badges||[]),v]})} o={[["","wählen…"],...S.lines.filter(l=>!ids.includes(l.id)).map(l=>[l.id,l.name])]}/></>;
+}
 export function PlanDialog(){
   const {S,dlg,edit}=useStore(),pg=S.page||{},u=(f,v)=>edit(D=>{D[f]=v},false),e=(fn,p)=>edit(fn,p);
   if(dlg!=="plan")return <Shell open={false}/>;
@@ -14,6 +21,8 @@ export function PlanDialog(){
     <R><Ck v={S.title.on} on={v=>e(D=>{D.title.on=v})} t="Titel"/><Tx l="Spalte" t="number" w={70} v={S.title.x} on={v=>e(D=>{D.title.x=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.title.y} on={v=>e(D=>{D.title.y=v},false)}/></R>
     <R><Ck v={S.legend.on} on={v=>e(D=>{D.legend.on=v})} t="Legende"/><Tx l="Spalte" t="number" w={70} v={S.legend.x} on={v=>e(D=>{D.legend.x=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.legend.y} on={v=>e(D=>{D.legend.y=v},false)}/>
       <Ck v={S.legend.ov!==0} on={v=>e(D=>{D.legend.ov=v})} t="Linienübersicht"/><Ck v={S.legend.en} on={v=>e(D=>{D.legend.en=v})} t="Englische Überschriften"/></R>
+    <R><Ck v={S.legend.sep} on={v=>e(D=>{D.legend.sep=v})} t="Linienübersicht unabhängig von der Legende platzieren"/>{!!S.legend.sep&&<><Tx l="Spalte" t="number" w={70} v={S.legend.lx==null?S.legend.x:S.legend.lx} on={v=>e(D=>{D.legend.lx=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.legend.ly==null?12:S.legend.ly} on={v=>e(D=>{D.legend.ly=v},false)}/></>}</R>
+    <R><Ck v={S.areasBack} on={v=>u("areasBack",v)} t="Alle Flächen in den Hintergrund (hinter alle anderen Zeichenobjekte)"/></R>
     <R><Ck v={S.frame} on={v=>u("frame",v)} t="Rahmen"/><Tx l="Badges pro Zeile (Endstationen)" t="number" w={80} v={S.bpr||6} on={v=>u("bpr",Math.max(1,Math.min(20,v)))}/><Ck v={S.bUnder} on={v=>u("bUnder",v)} t="Linienbadges unter dem Haltestellennamen (global, alle Ausrichtungen)"/><Ck v={S.bCenter} on={v=>u("bCenter",v)} t="Name und Badges zur Haltestelle zentrieren (links/rechts)"/><Ck v={S.sortImp} on={v=>u("sortImp",v)} t="Linien nach Wichtigkeit sortieren"/></R></Shell>;
 }
 export function StopDialog(){
@@ -23,9 +32,10 @@ export function StopDialog(){
   return <Shell side open={dlg==="stop"} title="Haltestellen und Wegpunkte">
     <R><Tx l="Neuer Name" v={nn} on={setNn}/><Button onClick={()=>add()}>Haltestelle</Button><Button onClick={()=>add(1)}>Wegpunkt</Button></R>
     <Sl l="Haltestelle wählen (danach auf den Plan klicken zum Setzen)" v={id||""} on={v=>set({sel:v||null})} o={[["","–"],...srt.map(x=>[x.id,(x.wp?"Wegpunkt: ":"")+x.name+(x.x==null?" (nicht gesetzt)":"")])]}/>
-    {s&&<><R><Tx l="Name" v={s.name} on={v=>up("name",v)}/></R>
+    {s&&<><R><Ta l="Name (Enter = Zeilenumbruch, mitten im Wort mit automatischem Bindestrich)" v={s.name} on={v=>up("name",v)}/></R>
       {!s.wp&&<><R><Sl l="Beschriftung" v={s.label||"E"} on={v=>up("label",v)} o={Object.keys(DIRS).map(k=>[k,k])}/><Tx l="Textabstand (Linien)" t="number" w={90} v={s.ld||0} on={v=>up("ld",v)}/><Ck v={s.bold} on={v=>up("bold",v)} t="Fett"/><Sl l="Linienbadges" v={s.bu==null?"":String(s.bu)} on={v=>up("bu",v===""?undefined:+v)} o={[["","wie global"],["1","unter dem Namen"],["0","über dem Namen"]]}/></R>
         <R><Tx l="Anmerkung (Fußnote)" v={s.fn||""} on={v=>up("fn",v)}/></R>
+        <BadgeEditor id={id}/>
         <R><Button onClick={()=>{edit(D=>{const q=D.stops.find(x=>x.id===id);(q.alt=q.alt||[]).push({x:null,y:null});set({sel:id+"#"+q.alt.length})})}}>Standort aufsplitten</Button></R>
         {(s.alt||[]).map((a,k)=><R key={k}><span>Standort {k+2}{a.x==null?" (nicht gesetzt)":""}</span><Button onClick={()=>set({sel:id+"#"+(k+1)})}>Setzen</Button><Button onClick={()=>{edit(D=>{const q=D.stops.find(x=>x.id===id);q.alt.splice(k,1);D.lines.forEach(l=>{const m=l.loc;if(m&&m[id]!=null){if(m[id]===k+1)m[id]=0;else if(m[id]>k+1)m[id]--}})});set({sel:id})}}>Löschen</Button></R>)}</>}
       <R><Button onClick={()=>{edit(D=>{D.stops=D.stops.filter(x=>x.id!==id);D.lines.forEach(l=>{l.sections=l.sections.map(c=>c.filter(i=>i!==id))})});set({sel:null})}}>Haltestelle löschen</Button></R></>}</Shell>;
@@ -37,12 +47,13 @@ export function DesignDialog(){
   const sf=(f,v)=>edit(X=>{(X.design.stop=X.design.stop||{})[f]=v},false),ct=(i,f,v,p)=>edit(X=>{X.design.cats.find(c=>c.id===i)[f]=v},p),
    tp=(k,f,v)=>edit(X=>{(X.design.tpl[k]=X.design.tpl[k]||{...TP(k)})[f]=v},false),oss=(i,f,v,p)=>edit(X=>{OSt().find(o=>o.id===i)[f]=v},p),lt=(k,v)=>edit(X=>{(X.design.legtxt=X.design.legtxt||{})[k]=v},false),tr=(k,v)=>edit(X=>{(X.design.tr=X.design.tr||{})[k]=v},false);
   const AN={w:2,head:12,gap:10,color:"",...(D0.ann||{})},sa=(f,v)=>edit(X=>{(X.design.ann=X.design.ann||{})[f]=v},false);
+  const newTpl=()=>{const nm=prompt("Name der neuen Textvorlage (z. B. Landesname groß):");if(!nm)return;const k="c_"+newId();edit(X=>{X.design.tpl[k]={...TP("text")};(X.design.tplNames=X.design.tplNames||{})[k]=nm})};
   const dash=[["","durchgezogen"],["dash","gestrichelt"],["dot","gepunktet"]];
   const body={
    sym:<><R><Sl l="Größe" v={sp.size} on={v=>sf("size",v)} o={[["s","Klein"],["m","Mittel"],["l","Groß"]]}/><Tx l="Kontur" t="number" w={70} v={sp.bw} on={v=>sf("bw",v)}/><Co l="Konturfarbe" v={sp.color} on={v=>sf("color",v)}/><Co l="Füllung" v={sp.fill} on={v=>sf("fill",v)}/></R>
      <R><Tx l="Verbindung aufgesplittet" t="number" w={90} v={sp.cw} on={v=>sf("cw",v)}/><Co l="Farbe" v={sp.cc} on={v=>sf("cc",v)}/><Co l="Umrandung zeitweise" v={sp.tc} on={v=>sf("tc",v)}/></R></>,
    cats:<>{D0.cats.map(c=><R key={c.id}><Tx l="Name" v={c.name} on={v=>ct(c.id,"name",v,false)}/><Tx l="Stärke" t="number" w={70} v={c.w} on={v=>ct(c.id,"w",Math.max(1,v),false)}/><Sl l="Strichart" v={c.dash} on={v=>ct(c.id,"dash",v)} o={dash}/><Button disabled={D0.cats.length<2} onClick={()=>edit(X=>{X.design.cats=X.design.cats.filter(q=>q.id!==c.id)})}>Löschen</Button></R>)}<Button onClick={()=>edit(X=>{X.design.cats.push({id:newId(),name:"Neue Kategorie",w:6,dash:""})})}>Kategorie hinzufügen</Button></>,
-   tpl:<>{Object.entries(TN).map(([k,n])=>{const t=TP(k);return <R key={k}><b style={{width:200}}>{n}</b><Tx l="Schrift" v={t.font} on={v=>tp(k,"font",v)} w={120}/><Tx l="Größe" t="number" w={64} v={t.size} on={v=>tp(k,"size",Math.max(6,v))}/><Co l="Farbe" v={t.color} on={v=>tp(k,"color",v)}/><Ck v={t.b} on={v=>tp(k,"b",v)} t="Fett"/><Ck v={t.i} on={v=>tp(k,"i",v)} t="Kursiv"/><Ck v={t.u} on={v=>tp(k,"u",v)} t="Unterstrichen"/></R>})}</>,
+   tpl:<>{Object.entries(TNs()).map(([k,n])=>{const t=TP(k);return <R key={k}><b style={{width:200}}>{n}</b><Tx l="Schrift" v={t.font} on={v=>tp(k,"font",v)} w={120}/><Tx l="Größe" t="number" w={64} v={t.size} on={v=>tp(k,"size",Math.max(6,v))}/><Co l="Farbe" v={t.color} on={v=>tp(k,"color",v)}/><Ck v={t.b} on={v=>tp(k,"b",v)} t="Fett"/><Ck v={t.i} on={v=>tp(k,"i",v)} t="Kursiv"/><Ck v={t.u} on={v=>tp(k,"u",v)} t="Unterstrichen"/>{!!(D0.tplNames&&D0.tplNames[k])&&<Button size="small" onClick={()=>edit(X=>{delete X.design.tpl[k];delete X.design.tplNames[k]})}>Löschen</Button>}</R>})}<Button onClick={newTpl}>Neue Textvorlage…</Button></>,
    ost:<>{os.map(o=><R key={o.id}><Tx l="Name" v={o.name} on={v=>oss(o.id,"name",v,false)}/><Co l="Farbe" v={o.color} on={v=>oss(o.id,"color",v,false)}/><Tx l="Breite" t="number" w={64} v={o.w} on={v=>oss(o.id,"w",v,false)}/><Sl l="Strichart" v={o.dash||""} on={v=>oss(o.id,"dash",v)} o={dash}/><Ck v={o.area} on={v=>oss(o.id,"area",v)} t="Fläche"/><Button disabled={os.length<2} onClick={()=>edit(X=>{X.design.ostyles=OSt().filter(q=>q.id!==o.id)})}>Löschen</Button></R>)}<Button onClick={()=>edit(X=>{OSt().push({id:newId(),name:"Neuer Stil",color:"#888888",w:4,dash:"",smooth:0,area:0})})}>Zeichenstil hinzufügen</Button></>,
    leg:<>{["legend","list","notes","plain","part","dirAll","dirSome","temp","zig"].map(k=><R key={k}><Tx l={k} v={LT(k)} on={v=>lt(k,v)} w={460}/></R>)}<R>{["legend","list","notes"].map(k=><Tx key={k} l={"Englisch: "+k} v={TR()[k]} on={v=>tr(k,v)}/>)}</R></>,
    ann:<R><Tx l="Strichstärke" t="number" w={90} v={AN.w} on={v=>sa("w",Math.max(.5,v))}/><Tx l="Pfeilspitze (Größe)" t="number" w={100} v={AN.head} on={v=>sa("head",Math.max(2,v))}/><Tx l="Abstand zur Linie (px)" t="number" w={120} v={AN.gap} on={v=>sa("gap",Math.max(0,v))}/><Ck v={!AN.color} on={v=>sa("color",v?"":"#222222")} t="Farbe der ersten Linie übernehmen"/>{!!AN.color&&<Co l="Farbe" v={AN.color} on={v=>sa("color",v)}/>}</R>

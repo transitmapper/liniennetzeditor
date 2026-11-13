@@ -37,7 +37,7 @@ export default function Canvas(){
     if(sel){edit(D=>{const p=posOf(sel);if(p){p.x=c.x;p.y=c.y}});set({sel:null})}};
   const move=e=>{if(selMove(e))return;const x=d.current;if(!x)return;const c=cell(e);
     if(x.h){const {k,i,j}=x.h;if(x.first){edit(()=>{});x.first=false}
-      edit(D=>{if(k==="p"){const b=obj(i);b.pts[+j]=s45c(b,c,+j)}else if(k==="t"){const t=D.texts.find(q=>q.id===i);t.x=c.x;t.y=c.y}else{const a=D.anns.find(q=>q.id===i);if(j==="1"){a.tx=c.x;a.ty=c.y}else{a.x=c.x;a.y=c.y}}},false);return}
+      edit(D=>{if(k==="p"){const b=obj(i);b.pts[+j]=s45c(b,c,+j)}else if(k==="i"){const m=D.imgs.find(q=>q.id===i);if(j==="0"){m.x=c.x;m.y=c.y}else{const w=Math.max(1,c.x-m.x);m.w=w;m.h=m.free?Math.max(1,c.y-m.y):Math.max(1,Math.round(w*(m.ar||m.h/m.w)))}}else if(k==="t"){const t=D.texts.find(q=>q.id===i);t.x=c.x;t.y=c.y}else{const a=D.anns.find(q=>q.id===i);if(j==="1"){a.tx=c.x;a.ty=c.y}else{a.x=c.x;a.y=c.y}}},false);return}
     const p=posOf(x.id);if(p&&(p.x!==c.x||p.y!==c.y)){if(x.first){edit(()=>{});x.first=false}edit(D=>{const q=posOf(x.id);q.x=c.x;q.y=c.y},false)}};
   return <div style={{overflow:"auto",height:"100%",background:"#e8e8e8",userSelect:"none",WebkitUserSelect:"none"}}><div ref={ref} style={{position:"relative",width:"max-content"}} onPointerDown={down} onPointerMove={move} onPointerUp={()=>{selUp();d.current=null}} onDoubleClick={finish}>
     <div dangerouslySetInnerHTML={{__html:html}}/>

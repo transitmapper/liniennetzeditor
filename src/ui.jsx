@@ -1,5 +1,5 @@
 import React from "react";
-import {Dialog,DialogSurface,DialogBody,DialogTitle,DialogContent,DialogActions,Button,Input,Select,Label} from "@fluentui/react-components";
+import {Dialog,DialogSurface,DialogBody,DialogTitle,DialogContent,DialogActions,Button,Input,Select,Label,Textarea} from "@fluentui/react-components";
 import {useStore} from "./store.js";
 export const close=()=>useStore.setState({dlg:null});
 export const Shell=({open,title,children,side})=><Dialog open={open} modalType={side?"non-modal":"modal"} onOpenChange={(_,d)=>!d.open&&close()}><DialogSurface style={side?{inset:"150px 16px auto auto",margin:0,width:400,maxWidth:"95vw",height:"fit-content"}:{maxWidth:760,width:"92vw"}}><DialogBody><DialogTitle>{title}</DialogTitle><DialogContent style={{maxHeight:side?"55vh":"65vh",overflow:"auto"}}>{children}</DialogContent><DialogActions><Button appearance="primary" onClick={close}>Schließen</Button></DialogActions></DialogBody></DialogSurface></Dialog>;
@@ -8,3 +8,4 @@ export const Tx=({l,v,on,w,t})=><div style={{display:"flex",flexDirection:"colum
 export const Sl=({l,v,o,on})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><Select value={v} onChange={(_,d)=>on(d.value)}>{o.map(q=><option key={q[0]} value={q[0]}>{q[1]}</option>)}</Select></div>;
 export const Ck=({v,on,t})=><label><input type="checkbox" checked={!!v} onChange={e=>on(+e.target.checked)}/> {t}</label>;
 export const Co=({l,v,on})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><input type="color" value={v} onChange={e=>on(e.target.value)}/></div>;
+export const Ta=({l,v,on,rows=2})=><div style={{display:"flex",flexDirection:"column"}}><Label size="small">{l}</Label><Textarea rows={rows} resize="vertical" value={v||""} onChange={(_,d)=>on(d.value)}/></div>;
