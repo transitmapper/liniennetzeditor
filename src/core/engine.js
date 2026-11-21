@@ -84,7 +84,7 @@ function pathD(V,closed){
 /* Berechnet alle Linienpfade mit Spurversatz und sammelt die Daten für die Haltestellensymbole */
 let BC={k:"",B:null};
 function build(ui){ // Ergebnis zwischenspeichern, solange sich Haltestellen, Linien und Kantenwahl nicht ändern
-  const k=(ui?1:0)+JSON.stringify([S.stops,S.lines,S.design.cats,S.flip,S.mode,S.order,S.lanes,S.laneMax]);
+  const k=(ui?1:0)+JSON.stringify([S.stops,S.lines,S.design.cats,S.flip,S.mode,S.order,S.lanes,S.laneMax,S.str]);
   if(BC.k===k) return BC.B;
   const B=build0(ui); BC={k,B}; return B;
 }
@@ -125,13 +125,13 @@ function build0(ui){
     if(!cy)[st[0],st[st.length-1]].forEach(nd=>{if(cnt(nd.sid)===1&&!nd.wp&&!(l.pass||{})[nd.sid]){const e=ends[nd.sid]=ends[nd.sid]||[];if(!e.includes(l))e.push(l)}});
   }));
   /* 2. Spuren je Rasterschritt: alle Linien, die denselben Schritt nutzen, laufen nebeneinander */
-  const use={};
+  const use={}, fz=new Set(); // fz: Rasterschritte, die auf Wunsch (S.str) geradlinig bleiben, ohne Abweichungsgrenze
   const look=(sec,j,dr)=>{const d=sec.dirs[j];for(let t=1;t<sec.M;t++){let k=j+dr*t;if(sec.cy)k=(k%sec.M+sec.M)%sec.M;else if(k<0||k>=sec.M)return null;const e=sec.dirs[k];if(e.x!==d.x||e.y!==d.y)return e}return null};
   secs.forEach(sec=>{sec.keys=[];
     for(let j=0;j<sec.M;j++){
       const P=sec.gp[j],Q=sec.gp[(j+1)%sec.N],a=P.x+","+P.y,b=Q.x+","+Q.y,lt=P.x<Q.x||(P.x===Q.x&&P.y<Q.y),fw=lt?1:-1,k=lt?a+"|"+b:b+"|"+a;
       const d=sec.dirs[j],f=look(sec,j,1),pv=look(sec,j,-1),sc=(f?sgn(cr(d,f)):0)+(pv?sgn(cr(pv,d)):0);
-      sec.keys.push([k,fw]);
+      sec.keys.push([k,fw]); if((S.str||{})[sec.ekeys[j]]) fz.add(k);
       const arr=use[k]=use[k]||[]; if(!arr.some(e=>e.l===sec.l)) arr.push({l:sec.l,sc:fw*sc,o:sec.li*100+sec.si});
     }});
   /* Sicherheit gegen Linienkreuzungen: Für zwei Linien gilt auf einem zusammenhängenden gemeinsamen Stück immer dieselbe Reihenfolge */
@@ -166,8 +166,9 @@ function build0(ui){
       const A=use[from],B=use[to],cnt={}; let best=null;
       B.forEach((e,ib)=>{const ia=A.findIndex(x=>x.l===e.l);if(ia>=0){const d=ia-ib;cnt[d]=(cnt[d]||0)+1}});
       Object.entries(cnt).forEach(([d,c])=>{const s=off[from]+(+d),cen=Math.abs(s+(B.length-1)/2);if(!best||c>best.c||(c===best.c&&cen<best.cen))best={s,c,cen}});
-      let s=best?best.s:-(B.length-1)/2; const cen=s+(B.length-1)/2;
-      if(Math.abs(cen)>maxDev) s-=cen-Math.sign(cen)*maxDev; // Begrenzung der Abweichung
+      let s=best?best.s:-(B.length-1)/2; const cen=s+(B.length-1)/2, free=fz.has(from)||fz.has(to);
+      if(free) fz.add(to); // markierter Ast: Geradlinigkeit gilt ab hier ohne Begrenzung weiter
+      else if(Math.abs(cen)>maxDev) s-=cen-Math.sign(cen)*maxDev; // Begrenzung der Abweichung
       off[to]=s;
     };
     Object.keys(use).forEach(k0=>{

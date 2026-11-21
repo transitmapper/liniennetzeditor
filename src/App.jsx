@@ -10,6 +10,7 @@ import {DrawPanel,DrawDialog} from "./DrawPanel.jsx";
 import {Shell,R,Tx,Ck} from "./ui.jsx";
 import {autoLabels,csvStops,csvLines,csvIn,exportSel,importSel,exportMsel,dl,addRecent,fname} from "./tools.js";
 import {svgMarkup,setS,demo,CW,CH} from "./core/engine.js";
+import {canFS,openProject,savePick,writeTo,perm,autoPref} from "./files.js";
 const Gp=({t,children})=><div style={{display:"flex",flexDirection:"column",padding:"0 12px",borderRight:"1px solid var(--colorNeutralStroke2)"}}><div style={{display:"flex",gap:6,alignItems:"flex-end",flex:1}}>{children}</div><div style={{fontSize:11,textAlign:"center",opacity:.7,marginTop:4}}>{t}</div></div>;
 const set=useStore.setState, dlg=n=>()=>set({dlg:n}), dsg=(n,t)=>()=>set({dlg:"design",dtab:t});
 export default function App(){
@@ -17,7 +18,29 @@ export default function App(){
   useEffect(()=>{const k=e=>{if(!(e.ctrlKey||e.metaKey)||/INPUT|SELECT/.test(e.target.tagName))return;const c=e.key.toLowerCase();
     if(c==="z"){e.preventDefault();e.shiftKey?st.redo():st.undo()}else if(c==="y"){e.preventDefault();st.redo()}else if(c==="s"){e.preventDefault();save()}};
     addEventListener("keydown",k);return()=>removeEventListener("keydown",k)});
-  const save=()=>{const j=JSON.stringify(S,null,1);dl(fname(S,"json"),"application/json",j);addRecent(fname(S,"json"),j);set({dirty:false})};
+  const auto=st.auto==null?autoPref():st.auto;
+  /* Speichern: mit File System Access API in dieselbe Datei, sonst Download. as===true: „Speichern unter“ */
+  const save=async as=>{
+    const S0=useStore.getState().S,j=JSON.stringify(S0,null,1),name=fname(S0,"json");
+    if(!canFS){dl(name,"application/json",j);addRecent(name,j);set({dirty:false});return}
+    try{
+      let h=st.fh;
+      if(h&&as!==true&&!(await perm(h,true)))h=null;
+      if(!h||as===true){h=await savePick(as===true&&st.fh?st.fh.name:name);if(!h)return}
+      await writeTo(h,j);addRecent(h.name,j);
+      set(useStore.getState().S===S0?{fh:h,dirty:false}:{fh:h});
+    }catch(e){alert("Speichern fehlgeschlagen: "+(e&&e.message||e))}
+  };
+  /* Autospeichern: zwei Sekunden nach der letzten Änderung, nur in eine bereits verknüpfte Datei */
+  useEffect(()=>{
+    if(!canFS||!auto||!st.fh||!st.dirty)return;
+    const t=setTimeout(async()=>{
+      const {fh,S:S0}=useStore.getState();if(!fh)return;
+      try{if(!(await perm(fh,false)))return;await writeTo(fh,JSON.stringify(S0,null,1));if(useStore.getState().S===S0)set({dirty:false})}catch{}
+    },2000);
+    return()=>clearTimeout(t);
+  },[st.S,st.dirty,st.fh,auto]);
+  useEffect(()=>{const b=e=>{if(useStore.getState().dirty){e.preventDefault();e.returnValue=""}};addEventListener("beforeunload",b);return()=>removeEventListener("beforeunload",b)},[]);
   const rd=(ref,fn)=>e=>{const f=e.target.files[0];e.target.value="";f&&f.text().then(t=>{try{fn(t)}catch{alert("Datei konnte nicht gelesen werden.")}})};
   const svg=()=>{setS(S);dl(fname(S,"svg"),"image/svg+xml",svgMarkup(false))};
   const png=()=>{setS(S);const u=URL.createObjectURL(new Blob([svgMarkup(false)],{type:"image/svg+xml"})),im=new Image();im.onload=()=>{const c=document.createElement("canvas"),k=Math.min(+S.pngk||2,16000/(32*Math.max(CW(),CH())));c.width=CW()*32*k;c.height=CH()*32*k;const x=c.getContext("2d");x.scale(k,k);x.drawImage(im,0,0);c.toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=fname(S,"png");a.click()})};im.src=u};
@@ -26,7 +49,7 @@ export default function App(){
   const delSel=()=>{edit(D=>{const m=msel;D.stops=D.stops.filter(s=>!m.s.includes(s.id));D.lines.forEach(l=>{l.sections=l.sections.map(c=>c.filter(i=>!m.s.includes(i)))});D.objs=(D.objs||[]).filter(o=>!m.o.includes(o.id));D.texts=(D.texts||[]).filter(o=>!m.t.includes(o.id));D.anns=(D.anns||[]).filter(o=>!m.a.includes(o.id))});set({msel:null})};
   const panels={
    start:<>
-    <Gp t="Datei"><Button onClick={()=>{if(!st.dirty||confirm("Ungespeicherte Änderungen gehen verloren. Trotzdem zum Startbildschirm?"))set({wiz:"start"})}}>Neu</Button><Button onClick={()=>fileRef.current.click()}>Öffnen</Button><Button onClick={save}>Speichern</Button><Button onClick={()=>st.load(demo())}>Beispielnetz</Button></Gp>
+    <Gp t="Datei"><Button onClick={()=>{if(!st.dirty||confirm("Ungespeicherte Änderungen gehen verloren. Trotzdem zum Startbildschirm?"))set({wiz:"start"})}}>Neu</Button><Button onClick={()=>canFS?openProject():fileRef.current.click()}>Öffnen</Button><Button onClick={()=>save()}>Speichern</Button>{canFS&&<Button onClick={()=>save(true)}>Speichern unter…</Button>}<Button onClick={()=>st.load(demo())}>Beispielnetz</Button>{canFS&&<Ck v={auto} on={v=>{try{localStorage["liniennetz-auto"]=v?"1":"0"}catch{}set({auto:!!v})}} t="Autospeichern"/>}</Gp>
     <Gp t="Export"><Button appearance="primary" onClick={svg}>SVG</Button><Button appearance="primary" onClick={png}>PNG</Button><Button appearance="primary" onClick={pdf}>PDF</Button></Gp>
     <Gp t="Auswahl"><Button appearance={selMode?"primary":"secondary"} onClick={()=>set({selMode:!selMode,msel:null,rb:null,sel:null,selX:null})}>Auswahlmodus</Button><Button disabled={!msel||!msel.s.length} onClick={()=>exportMsel(S,msel)}>Exportieren</Button><Button disabled={!msel} onClick={delSel}>Löschen</Button><Button onClick={()=>xRef.current.click()}>Importieren</Button></Gp>
     <Gp t="Hintergrund"><Button onClick={dlg("bg")}>Hintergrundbild…</Button></Gp></>,
@@ -50,7 +73,7 @@ export default function App(){
       <Button appearance="subtle" icon={<ZoomOut24Regular/>} onClick={()=>st.setZoom(st.zoom-.2)}/><span>{Math.round(st.zoom*100)} %</span><Button appearance="subtle" icon={<ZoomIn24Regular/>} onClick={()=>st.setZoom(st.zoom+.2)}/></div>
     <div style={{display:"flex",padding:"8px 0",overflowX:"auto",borderTop:"1px solid var(--colorNeutralStroke2)",borderBottom:"1px solid var(--colorNeutralStroke2)",minHeight:72}}>{panels[tab]}</div>
     <Canvas/>
-    <div style={{padding:"3px 12px",fontSize:12,opacity:.8,borderTop:"1px solid var(--colorNeutralStroke2)",display:"flex",gap:14}}><a href="../impressum.html" target="_blank" rel="noreferrer">Impressum</a><a href="../datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a><a href="#" onClick={e=>{e.preventDefault();set({dlg:"info"})}}>Info</a><span style={{flex:1}}/><span>Version 1.2</span></div>
+    <div style={{padding:"3px 12px",fontSize:12,opacity:.8,borderTop:"1px solid var(--colorNeutralStroke2)",display:"flex",gap:14}}><a href="../impressum.html" target="_blank" rel="noreferrer">Impressum</a><a href="../datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a><a href="#" onClick={e=>{e.preventDefault();set({dlg:"info"})}}>Info</a><span style={{flex:1}}/>{canFS&&<span>{st.fh?(st.dirty?"● ungespeicherte Änderungen":"✓ gespeichert: "+st.fh.name):(st.dirty?"● noch nicht gespeichert":"")}</span>}<span>Version 1.2</span></div>
     <Shell open={st.dlg==="info"} title="Liniennetz-Editor · Info">
       <p>Version 1.2. Editor für Liniennetzpläne im Browser. Alle Daten bleiben auf deinem Rechner.</p>
       <p><b>Sprache:</b> Der Editor ist derzeit nur auf Deutsch verfügbar.</p>

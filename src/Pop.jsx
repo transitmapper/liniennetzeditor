@@ -7,10 +7,16 @@ export function Pop(){
   const LB=getLB(),k=pop.k,h=LB.hits[k],L=LB.lanes[k]||[],nm=i=>(S.stops.find(s=>s.id===i.split("#")[0])||{}).name,close=()=>useStore.setState({pop:null});
   const mv=(i,d)=>{const ids=L.map(l=>l.id),a=ids.indexOf(i),b=a+d;if(b<0||b>=ids.length)return;[ids[a],ids[b]]=[ids[b],ids[a]];edit(D=>{(D.order=D.order||{})[k]=ids})};
   const [a,b]=k.split("|");
+  /* Abzweigung: mindestens ein Ende der Verbindung hat drei oder mehr Verbindungen */
+  const deg={};Object.keys(LB.hits).forEach(q=>q.split("|").forEach(n=>{deg[n]=(deg[n]||0)+1}));
+  const branch=(deg[a]||0)>=3||(deg[b]||0)>=3, straightOn=!!(S.str||{})[k];
   return <Card style={{position:"fixed",left:Math.max(0,Math.min(pop.x,innerWidth-300)),top:Math.max(0,Math.min(pop.y,innerHeight-360)),width:280,zIndex:10}}>
     <Text weight="semibold">{nm(a)} – {nm(b)}</Text>
     {h&&h.diag&&<div style={{display:"flex",gap:4,flexWrap:"wrap"}}><Button size="small" onClick={()=>edit(D=>{D.mode=D.mode||{};if(D.mode[k])delete D.mode[k];else D.mode[k]="rect";if(D.flip)delete D.flip[k]})}>Verlauf: {h.rect?"rechtwinklig":"schräg"}</Button>
       {h.flipOk&&<Button size="small" onClick={()=>edit(D=>{D.flip=D.flip||{};if(D.flip[k])delete D.flip[k];else D.flip[k]=1})}>Knick umlegen</Button>}</div>}
+    {branch&&S.lanes==="straight"&&<div style={{display:"flex",flexDirection:"column",gap:2}}>
+      <Button size="small" appearance={straightOn?"primary":"secondary"} onClick={()=>edit(D=>{D.str=D.str||{};if(D.str[k])delete D.str[k];else D.str[k]=1})}>Gerade weiterführen: {straightOn?"an":"aus"}</Button>
+      <Text size={200}>Abzweigung: Die Linien dieses Astes laufen ab hier ohne Knick geradeaus weiter, auch wenn das Bündel dadurch nicht mehr mittig liegt. Bei mehreren Ästen kann jeder einzeln markiert werden.</Text></div>}
     {L.length>0&&<Button size="small" onClick={()=>edit(D=>{D.ebadge=D.ebadge||{};if(D.ebadge[k])delete D.ebadge[k];else D.ebadge[k]={o:0}})}>{(S.ebadge||{})[k]?"Linienbadges entfernen":"Linienbadges auf Verbindung"}</Button>}
     {(S.ebadge||{})[k]&&<div><Button size="small" onClick={()=>edit(D=>{D.ebadge[k].o--})}>◀</Button><Button size="small" onClick={()=>edit(D=>{D.ebadge[k].o++})}>▶</Button></div>}
     {L.length>1&&<><Text size={200}>Reihenfolge (Richtung {nm(a)} → {nm(b)})</Text>{L.map((l,i)=><div key={l.id} style={{display:"flex",gap:4,alignItems:"center"}}><span style={{background:l.color,color:"#fff",borderRadius:l.shape==="rect"?3:99,padding:"1px 10px",minWidth:40,textAlign:"center"}}>{l.name}</span><Button size="small" disabled={!i} onClick={()=>mv(l.id,-1)}>▲</Button><Button size="small" disabled={i===L.length-1} onClick={()=>mv(l.id,1)}>▼</Button></div>)}

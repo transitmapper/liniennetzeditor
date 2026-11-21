@@ -4,6 +4,7 @@ import {useStore} from "./store.js";
 import {Tx,Sl} from "./ui.jsx";
 import {setS,SP,TP,pageSync,CW,CH} from "./core/engine.js";
 import {recents,addRecent} from "./tools.js";
+import {canFS,openProject} from "./files.js";
 const ff=f=>f+", Arial, sans-serif", WP="M20 190H90L140 140H210L260 90H300", dsh=d=>d==="dash"?"14 9":d==="dot"?"1 10":undefined;
 const Intro=()=><svg viewBox="0 0 320 240" style={{width:"100%"}}><style>{`.dr{stroke-dasharray:1;stroke-dashoffset:1;animation:dr 1.6s var(--d) ease forwards}.pp{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:pp .4s var(--d) ease forwards}@keyframes dr{to{stroke-dashoffset:0}}@keyframes pp{to{transform:scale(1)}}`}</style>
   <g fill="none" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"><path className="dr" pathLength="1" style={{"--d":"0s"}} stroke="#d62828" d={WP}/><path className="dr" pathLength="1" style={{"--d":".5s"}} stroke="#1d6fb8" d="M20 60H100L150 110H210L260 160H300"/><path className="dr" pathLength="1" style={{"--d":"1s"}} stroke="#2a9d4a" d="M60 220V150L100 110L140 70V20"/></g>
@@ -31,10 +32,11 @@ export default function Wizard(){
   const pg=S.page||{},e=(fn,p=false)=>edit(fn,p),fin=()=>set({wiz:null,past:[],future:[],dirty:false});
   const pa=(f,v)=>e(D=>{D.page={fmt:(D.page||{}).fmt||"free",orient:(D.page||{}).orient||"land"};D.page[f]=v;setS(D);pageSync("cols")});
   const openF=ev=>{const f=ev.target.files[0];ev.target.value="";f&&f.text().then(t=>{try{const d=JSON.parse(t);if(!d.design||!d.stops)throw 0;st.load(d);addRecent(f.name,t);set({wiz:null})}catch{alert("Datei konnte nicht gelesen werden.")}})};
+  const openFile=async()=>{if(canFS){if(await openProject())set({wiz:null})}else fRef.current.click()};
   const sp=SP(),cats=S.design.cats;
   const right={
    start:<><Text size={800} weight="bold" block>Liniennetz-Editor</Text><p style={{opacity:.75}}>Haltestellen setzen, Linien zuordnen – den Rest zeichnet das Programm.</p>
-     <div style={{display:"flex",gap:8,margin:"12px 0"}}><Button appearance="primary" onClick={()=>{st.fresh();set({wiz:"plan"})}}>Neues Projekt</Button><Button onClick={()=>fRef.current.click()}>Datei öffnen…</Button></div>
+     <div style={{display:"flex",gap:8,margin:"12px 0"}}><Button appearance="primary" onClick={()=>{st.fresh();set({wiz:"plan"})}}>Neues Projekt</Button><Button onClick={openFile}>Datei öffnen…</Button></div>
      <Text weight="semibold" block style={{marginTop:16}}>Zuletzt verwendet</Text>
      {recents().length?recents().map((x,i)=><div key={i}><Button appearance="subtle" onClick={()=>{try{st.load(JSON.parse(x.data));set({wiz:null})}catch{alert("Datei konnte nicht gelesen werden.")}}}>{x.name} <span style={{opacity:.6,marginLeft:8,fontSize:12}}>{new Date(x.time).toLocaleString("de")}</span></Button></div>):<p style={{opacity:.7}}>Noch keine Dateien.</p>}
      <div style={{marginTop:20}}><Button onClick={fin}>Assistent schließen</Button></div><p style={{marginTop:28,fontSize:12,opacity:.75}}><a href="../impressum.html" target="_blank" rel="noreferrer">Impressum</a> · <a href="../datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a> · <a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose" target="_blank" rel="noreferrer">Fehler melden</a> · nur auf Deutsch verfügbar</p></>,
