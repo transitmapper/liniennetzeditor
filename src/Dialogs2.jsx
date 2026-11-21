@@ -10,22 +10,60 @@ function BadgeEditor({id}){
     {ids.map(i=>{const l=ln(i);return l?<R key={i}><span style={{background:l.color,color:"#fff",borderRadius:l.shape==="rect"?3:99,padding:"2px 12px"}}>{l.name}</span><Ck v={(l.bo||{})[id]} on={()=>bo(i)} t="umrandet (Linienfarbe, weiß gefüllt)"/>{!ends.includes(i)&&<Button size="small" onClick={()=>edit(D=>{const q=D.stops.find(x=>x.id===id);q.badges=(q.badges||[]).filter(z=>z!==i)})}>Entfernen</Button>}</R>:null})}
     <Sl l="Linienbadge hinzufügen" v="" on={v=>v&&edit(D=>{const q=D.stops.find(x=>x.id===id);q.badges=[...(q.badges||[]),v]})} o={[["","wählen…"],...S.lines.filter(l=>!ids.includes(l.id)).map(l=>[l.id,l.name])]}/></>;
 }
+/* Layout-Bausteine für die Plan-Einstellungen: Abschnitt mit Überschrift und CSS-Grid */
+const Sec=({t,hint,children})=><section style={{margin:"0 0 20px"}}>
+  <div style={{fontWeight:600,fontSize:14,paddingBottom:4,marginBottom:hint?4:10,borderBottom:"1px solid var(--colorNeutralStroke2)"}}>{t}</div>
+  {hint&&<div style={{fontSize:12,opacity:.7,marginBottom:10}}>{hint}</div>}
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:"10px 14px",alignItems:"end"}}>{children}</div></section>;
+const Full=({children})=><div style={{gridColumn:"1 / -1"}}>{children}</div>;
+const Cb=({children})=><div style={{paddingBottom:6}}>{children}</div>;
 export function PlanDialog(){
   const {S,dlg,edit}=useStore(),pg=S.page||{},u=(f,v)=>edit(D=>{D[f]=v},false),e=(fn,p)=>edit(fn,p);
   if(dlg!=="plan")return <Shell open={false}/>;
   const pa=(f,v)=>edit(D=>{D.page={fmt:(D.page||{}).fmt||"free",orient:(D.page||{}).orient||"land"};D.page[f]=v;setS(D);pageSync("cols")});
   return <Shell open title="Plan-Einstellungen">
-    <R><Tx l="Titel" v={S.title.text} on={v=>e(D=>{D.title.text=v},false)}/><Tx l="Untertitel" v={S.title.sub} on={v=>e(D=>{D.title.sub=v},false)}/><Tx l="Fußzeile / Quelle" v={S.foot||""} on={v=>u("foot",v)}/></R>
-    <R><Sl l="Seitenformat" v={pg.fmt||"free"} on={v=>pa("fmt",v)} o={[["free","Frei"],["A4","A4"],["A3","A3"]]}/><Sl l="Ausrichtung" v={pg.orient||"land"} on={v=>pa("orient",v)} o={[["land","Querformat"],["port","Hochformat"]]}/>
-      <Tx l="Spalten" t="number" w={80} v={S.cols||56} on={v=>e(D=>{D.cols=Math.max(5,v);setS(D);pageSync("cols")},false)}/><Tx l="Zeilen" t="number" w={80} v={S.rows||36} on={v=>u("rows",Math.max(5,v))}/><Sl l="PNG-Auflösung" v={String(+S.pngk||2)} on={v=>u("pngk",+v)} o={[["1","1×"],["2","2×"],["4","4×"]]}/></R>
-    <R><Ck v={S.title.on} on={v=>e(D=>{D.title.on=v})} t="Titel"/><Tx l="Spalte" t="number" w={70} v={S.title.x} on={v=>e(D=>{D.title.x=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.title.y} on={v=>e(D=>{D.title.y=v},false)}/></R>
-    <R><Ck v={S.legend.on} on={v=>e(D=>{D.legend.on=v})} t="Legende"/><Tx l="Spalte" t="number" w={70} v={S.legend.x} on={v=>e(D=>{D.legend.x=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.legend.y} on={v=>e(D=>{D.legend.y=v},false)}/>
-      <Ck v={S.legend.ov!==0} on={v=>e(D=>{D.legend.ov=v})} t="Linienübersicht"/><Ck v={S.legend.en} on={v=>e(D=>{D.legend.en=v})} t="Englische Überschriften"/></R>
-    <R><Ck v={S.legend.sep} on={v=>e(D=>{D.legend.sep=v})} t="Linienübersicht unabhängig von der Legende platzieren"/>{!!S.legend.sep&&<><Tx l="Spalte" t="number" w={70} v={S.legend.lx==null?S.legend.x:S.legend.lx} on={v=>e(D=>{D.legend.lx=v},false)}/><Tx l="Zeile" t="number" w={70} v={S.legend.ly==null?12:S.legend.ly} on={v=>e(D=>{D.legend.ly=v},false)}/></>}</R>
-    <R><Ck v={S.areasBack} on={v=>u("areasBack",v)} t="Alle Flächen in den Hintergrund (hinter alle anderen Zeichenobjekte)"/></R>
-    <R><Ck v={S.frame} on={v=>u("frame",v)} t="Rahmen"/><Tx l="Badges pro Zeile (Endstationen)" t="number" w={80} v={S.bpr||6} on={v=>u("bpr",Math.max(1,Math.min(20,v)))}/><Ck v={S.bUnder} on={v=>u("bUnder",v)} t="Linienbadges unter dem Haltestellennamen (global, alle Ausrichtungen)"/><Ck v={S.bCenter} on={v=>u("bCenter",v)} t="Name und Badges zur Haltestelle zentrieren (links/rechts)"/><Ck v={S.sortImp} on={v=>u("sortImp",v)} t="Linien nach Wichtigkeit sortieren"/></R>
-    <R><Sl l="Linienbündel" v={S.lanes||"center"} on={v=>e(D=>{D.lanes=v})} o={[["center","zentriert (wie bisher)"],["straight","geradlinig bevorzugen"]]}/>
-      {S.lanes==="straight"&&<Sl l="Max. Abweichung von der Rasterlinie" v={String(S.laneMax==null?1.5:S.laneMax)} on={v=>e(D=>{D.laneMax=+v})} o={[["0.5","0,5 Spuren"],["1","1 Spur"],["1.5","1,5 Spuren"],["2","2 Spuren"],["3","3 Spuren"],["99","unbegrenzt"]]}/>}</R></Shell>;
+    <Sec t="Texte">
+      <Tx l="Titel" v={S.title.text} on={v=>e(D=>{D.title.text=v},false)}/>
+      <Tx l="Untertitel" v={S.title.sub} on={v=>e(D=>{D.title.sub=v},false)}/>
+      <Tx l="Fußzeile / Quelle" v={S.foot||""} on={v=>u("foot",v)}/>
+    </Sec>
+    <Sec t="Seite und Raster" hint="Bei A4/A3 ergeben sich die Zeilen aus den Spalten.">
+      <Sl l="Seitenformat" v={pg.fmt||"free"} on={v=>pa("fmt",v)} o={[["free","Frei"],["A4","A4"],["A3","A3"]]}/>
+      <Sl l="Ausrichtung" v={pg.orient||"land"} on={v=>pa("orient",v)} o={[["land","Querformat"],["port","Hochformat"]]}/>
+      <Tx l="Spalten" t="number" v={S.cols||56} on={v=>e(D=>{D.cols=Math.max(5,v);setS(D);pageSync("cols")},false)}/>
+      <Tx l="Zeilen" t="number" v={S.rows||36} on={v=>u("rows",Math.max(5,v))}/>
+      <Sl l="PNG-Auflösung" v={String(+S.pngk||2)} on={v=>u("pngk",+v)} o={[["1","1×"],["2","2×"],["4","4×"]]}/>
+      <Cb><Ck v={S.frame} on={v=>u("frame",v)} t="Rahmen um den Plan"/></Cb>
+    </Sec>
+    <Sec t="Titel auf dem Plan" hint="Position in Rasterkästchen.">
+      <Cb><Ck v={S.title.on} on={v=>e(D=>{D.title.on=v})} t="Titel anzeigen"/></Cb>
+      <Tx l="Spalte" t="number" v={S.title.x} on={v=>e(D=>{D.title.x=v},false)}/>
+      <Tx l="Zeile" t="number" v={S.title.y} on={v=>e(D=>{D.title.y=v},false)}/>
+    </Sec>
+    <Sec t="Legende und Linienübersicht" hint="Position in Rasterkästchen.">
+      <Cb><Ck v={S.legend.on} on={v=>e(D=>{D.legend.on=v})} t="Legende anzeigen"/></Cb>
+      <Tx l="Spalte" t="number" v={S.legend.x} on={v=>e(D=>{D.legend.x=v},false)}/>
+      <Tx l="Zeile" t="number" v={S.legend.y} on={v=>e(D=>{D.legend.y=v},false)}/>
+      <Cb><Ck v={S.legend.ov!==0} on={v=>e(D=>{D.legend.ov=v})} t="Linienübersicht anzeigen"/></Cb>
+      <Cb><Ck v={S.legend.en} on={v=>e(D=>{D.legend.en=v})} t="Englische Überschriften"/></Cb>
+      <Full><Ck v={S.legend.sep} on={v=>e(D=>{D.legend.sep=v})} t="Linienübersicht unabhängig von der Legende platzieren"/></Full>
+      {!!S.legend.sep&&<>
+        <Tx l="Übersicht: Spalte" t="number" v={S.legend.lx==null?S.legend.x:S.legend.lx} on={v=>e(D=>{D.legend.lx=v},false)}/>
+        <Tx l="Übersicht: Zeile" t="number" v={S.legend.ly==null?12:S.legend.ly} on={v=>e(D=>{D.legend.ly=v},false)}/></>}
+    </Sec>
+    <Sec t="Linien und Linienbündel">
+      <Sl l="Linienbündel" v={S.lanes||"center"} on={v=>e(D=>{D.lanes=v})} o={[["center","zentriert (wie bisher)"],["straight","geradlinig bevorzugen"]]}/>
+      {S.lanes==="straight"&&<Sl l="Max. Abweichung von der Rasterlinie" v={String(S.laneMax==null?1.5:S.laneMax)} on={v=>e(D=>{D.laneMax=+v})} o={[["0.5","0,5 Spuren"],["1","1 Spur"],["1.5","1,5 Spuren"],["2","2 Spuren"],["3","3 Spuren"],["99","unbegrenzt"]]}/>}
+      <Full><Ck v={S.sortImp} on={v=>u("sortImp",v)} t="Linien in Legende und Übersicht nach Wichtigkeit sortieren"/></Full>
+    </Sec>
+    <Sec t="Haltestellenbeschriftung und Linienbadges">
+      <Tx l="Badges pro Zeile (Endstationen)" t="number" v={S.bpr||6} on={v=>u("bpr",Math.max(1,Math.min(20,v)))}/>
+      <Full><Ck v={S.bUnder} on={v=>u("bUnder",v)} t="Linienbadges unter dem Haltestellennamen (global, alle Ausrichtungen)"/></Full>
+      <Full><Ck v={S.bCenter} on={v=>u("bCenter",v)} t="Name und Badges zur Haltestelle zentrieren (links/rechts)"/></Full>
+    </Sec>
+    <Sec t="Zeichenobjekte">
+      <Full><Ck v={S.areasBack} on={v=>u("areasBack",v)} t="Alle Flächen in den Hintergrund (hinter alle anderen Zeichenobjekte)"/></Full>
+    </Sec></Shell>;
 }
 export function StopDialog(){
   const {S,sel,dlg,edit}=useStore(),set=useStore.setState,[nn,setNn]=useState("");

@@ -50,9 +50,9 @@ export default function App(){
       <Button appearance="subtle" icon={<ZoomOut24Regular/>} onClick={()=>st.setZoom(st.zoom-.2)}/><span>{Math.round(st.zoom*100)} %</span><Button appearance="subtle" icon={<ZoomIn24Regular/>} onClick={()=>st.setZoom(st.zoom+.2)}/></div>
     <div style={{display:"flex",padding:"8px 0",overflowX:"auto",borderTop:"1px solid var(--colorNeutralStroke2)",borderBottom:"1px solid var(--colorNeutralStroke2)",minHeight:72}}>{panels[tab]}</div>
     <Canvas/>
-    <div style={{padding:"3px 12px",fontSize:12,opacity:.8,borderTop:"1px solid var(--colorNeutralStroke2)",display:"flex",gap:14}}><a href="../impressum.html" target="_blank" rel="noreferrer">Impressum</a><a href="../datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a><a href="#" onClick={e=>{e.preventDefault();set({dlg:"info"})}}>Info</a><span style={{flex:1}}/><span>Version 1.1</span></div>
+    <div style={{padding:"3px 12px",fontSize:12,opacity:.8,borderTop:"1px solid var(--colorNeutralStroke2)",display:"flex",gap:14}}><a href="../impressum.html" target="_blank" rel="noreferrer">Impressum</a><a href="../datenschutz.html" target="_blank" rel="noreferrer">Datenschutz</a><a href="#" onClick={e=>{e.preventDefault();set({dlg:"info"})}}>Info</a><span style={{flex:1}}/><span>Version 1.2</span></div>
     <Shell open={st.dlg==="info"} title="Liniennetz-Editor · Info">
-      <p>Version 1.1. Editor für Liniennetzpläne im Browser. Alle Daten bleiben auf deinem Rechner.</p>
+      <p>Version 1.2. Editor für Liniennetzpläne im Browser. Alle Daten bleiben auf deinem Rechner.</p>
       <p><b>Sprache:</b> Der Editor ist derzeit nur auf Deutsch verfügbar.</p>
       <p><b>Fehler gefunden oder eine Idee?</b> Bitte melde sie auf GitHub: <a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose" target="_blank" rel="noreferrer">Fehler melden oder Funktion vorschlagen</a>. Hilfreich sind die Schritte zum Nachstellen und möglichst eine Projektdatei oder ein Screenshot (bitte ohne personenbezogene Daten).</p>
       <p><b>Hinweis zu KI:</b> Dieses Programm wurde mit Unterstützung von KI (Claude von Anthropic) entwickelt und vom Autor geprüft und getestet.</p>
