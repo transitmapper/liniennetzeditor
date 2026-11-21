@@ -7,7 +7,7 @@ const TN={stop:"Station normal",end:"Endstation",h1:"Überschrift 1",h2:"Übersc
 const T=(size,b=0,color="#111111")=>({font:"Segoe UI",size,color,b,i:0,u:0});
 const defDesign=()=>({cats:[{id:"c1",name:"Häufig bedient",w:8,dash:""},{id:"c2",name:"Selten bedient",w:5,dash:"dash"}],tpl:{stop:T(14),end:T(14,1),h1:T(30,1),h2:T(22,1),sub:T(16,0,"#555555"),text:T(13),en:{...T(15,0,"#777777"),i:1},water:{...T(14,0,"#4a86b8"),i:1},area:{...T(15,1,"#8a8a8a")},badge:T(10,1),leg:T(13),arrow:T(14)},ostyles:[{id:"o1",name:"Fluss",color:"#7ab8e8",w:6,dash:"",smooth:0,area:0},{id:"o2",name:"Ländergrenze",color:"#9a9a9a",w:3,dash:"dash",smooth:0,area:0},{id:"o3",name:"Bahnstrecke (nicht bedient)",color:"#6b6b6b",w:5,dash:"",smooth:0,area:0}]});
 const DT=defDesign().tpl;
-const empty=d=>({design:d||defDesign(),title:{on:1,text:"Liniennetz",sub:"Regionalverkehr",x:1,y:1},legend:{on:1,x:44,y:2},stops:[],lines:[]});
+const empty=d=>({design:d||defDesign(),lanes:"straight",title:{on:1,text:"Liniennetz",sub:"Regionalverkehr",x:1,y:1},legend:{on:1,x:44,y:2},stops:[],lines:[]});
 function load(){try{const s=JSON.parse(localStorage[KEY]);return s&&s.design?s:empty()}catch(e){return empty()}}
 let S=empty(), sel=null, drag=null, zoom=1, uid=Date.now()%100000, info={}, open={plan:1,design:1,draw:1,check:1};
 let cur=null, ustack=[], rstack=[], lastCh=0, sq="", dirty=false, fh=null;
@@ -84,12 +84,12 @@ function pathD(V,closed){
 /* Berechnet alle Linienpfade mit Spurversatz und sammelt die Daten für die Haltestellensymbole */
 let BC={k:"",B:null};
 function build(ui){ // Ergebnis zwischenspeichern, solange sich Haltestellen, Linien und Kantenwahl nicht ändern
-  const k=(ui?1:0)+JSON.stringify([S.stops,S.lines,S.design.cats,S.flip,S.mode,S.order]);
+  const k=(ui?1:0)+JSON.stringify([S.stops,S.lines,S.design.cats,S.flip,S.mode,S.order,S.lanes,S.laneMax]);
   if(BC.k===k) return BC.B;
   const B=build0(ui); BC={k,B}; return B;
 }
 function build0(ui){
-  const gap=Math.max(...S.design.cats.map(c=>c.w))+3, paths=[], used=new Set(), I={}, hits={}, lanes={}, ends={}, passN=new Set(), secs=[];
+  const gap=Math.max(...S.design.cats.map(c=>c.w))+3, paths=[], used=new Set(), I={}, hits={}, lanes={}, lsh={}, ends={}, passN=new Set(), secs=[];
   const eff=(l,si)=>{ // eigene Halte; bei „folgt Linie“ werden Zwischenhalte der Referenzlinie als Durchfahrt ergänzt
     const own=l.sections[si], R=(l.follow||{})[si]&&line(l.follow[si]), out=[];
     own.forEach((id,k)=>{
@@ -154,10 +154,36 @@ function build0(ui){
     });
   });
   Object.entries(use).forEach(([k,a])=>a.sort((x,y)=>{const v=dec[k+"|"+x.l.id+"|"+y.l.id];return v!==undefined?-v:x.sc-y.sc||x.o-y.o}));
+  /* 2b. Spurverschiebung je Rasterschritt: zentriert (Standard, wie bisher) oder geradlinig.
+     Versatz einer Linie = (Index + off[Schritt]) * gap. Zentriert: off = -(n-1)/2. */
+  const off={}; Object.keys(use).forEach(k=>{off[k]=-(use[k].length-1)/2});
+  if(S.lanes==="straight"){
+    const maxDev=S.laneMax==null?1.5:Math.max(0,+S.laneMax), q2={}, done=new Set();
+    Object.keys(use).forEach(k=>{const [a,b]=k.split("|"),[ax,ay]=a.split(",").map(Number),[bx,by]=b.split(",").map(Number);q2[k]={a,b,ax,ay,bx,by,dx:bx-ax,dy:by-ay}});
+    const nxt=k=>{const q=q2[k],t=q.b+"|"+(q.bx+q.dx)+","+(q.by+q.dy);return use[t]?t:null};
+    const prv=k=>{const q=q2[k],t=(q.ax-q.dx)+","+(q.ay-q.dy)+"|"+q.a;return use[t]?t:null};
+    const prop=(from,to)=>{ // Verschiebung des Nachbarschritts so wählen, dass gemeinsame Linien geradeaus weiterlaufen
+      const A=use[from],B=use[to],cnt={}; let best=null;
+      B.forEach((e,ib)=>{const ia=A.findIndex(x=>x.l===e.l);if(ia>=0){const d=ia-ib;cnt[d]=(cnt[d]||0)+1}});
+      Object.entries(cnt).forEach(([d,c])=>{const s=off[from]+(+d),cen=Math.abs(s+(B.length-1)/2);if(!best||c>best.c||(c===best.c&&cen<best.cen))best={s,c,cen}});
+      let s=best?best.s:-(B.length-1)/2; const cen=s+(B.length-1)/2;
+      if(Math.abs(cen)>maxDev) s-=cen-Math.sign(cen)*maxDev; // Begrenzung der Abweichung
+      off[to]=s;
+    };
+    Object.keys(use).forEach(k0=>{
+      if(done.has(k0)) return;
+      let s0=k0; for(let g;(g=prv(s0));) s0=g;
+      const run=[]; for(let c=s0;c;c=nxt(c)) run.push(c);
+      run.forEach(k=>done.add(k));
+      let ai=0; run.forEach((k,i)=>{if(use[k].length>use[run[ai]].length)ai=i}); // Anker = breitestes Bündel, bleibt zentriert
+      for(let i=ai;i<run.length-1;i++) prop(run[i],run[i+1]);
+      for(let i=ai;i>0;i--) prop(run[i],run[i-1]);
+    });
+  }
   /* 3. Versetzte Pfade mit Ecken an den Schnittpunkten der Spuren */
   secs.forEach(sec=>{
     const {l,gp,at,dirs,N,M,cy}=sec, so=[], V=[];
-    for(let j=0;j<M;j++){const [k,fw]=sec.keys[j],arr=use[k],i=arr.findIndex(e=>e.l===l);so.push(fw*(i-(arr.length-1)/2)*gap);if(!lanes[sec.ekeys[j]]){const ls=arr.map(e=>e.l);lanes[sec.ekeys[j]]=fw*sec.efws[j]<0?ls.reverse():ls}}
+    for(let j=0;j<M;j++){const [k,fw]=sec.keys[j],arr=use[k],i=arr.findIndex(e=>e.l===l);so.push(fw*(i+off[k])*gap);if(!lanes[sec.ekeys[j]]){const ls=arr.map(e=>e.l);lanes[sec.ekeys[j]]=fw*sec.efws[j]<0?ls.reverse():ls;lsh[sec.ekeys[j]]=fw*sec.efws[j]>0?off[k]:-(arr.length-1)-off[k]}}
     const sg=j=>{const d=dirs[j],L=Math.hypot(d.x,d.y),u={x:d.x/L,y:d.y/L};return{u,n:{x:-u.y,y:u.x}}};
     for(let j=0;j<N;j++){
       const ii=cy?(j-1+M)%M:j-1, oi=j<M?j:-1, A=ii>=0?sg(ii):null, B=oi>=0?sg(oi):null, v={x:gp[j].x*G,y:gp[j].y*G}, nd=at[j];
@@ -199,7 +225,7 @@ function build0(ui){
     sec.V.forEach(p=>{if(p.ck)p.r=Math.max(3,p.rin+mx[p.ck]-p.inn)});
     if(sec.V.length>1) paths.push({d:pathD(sec.V,sec.cy&&sec.V.length>2),color:sec.l.color,w:sec.w,dash:sec.cat.dash,lid:sec.l.id});
   });
-  return{paths,I,ends,lanes,hits:Object.fromEntries(Object.entries(hits).map(([k,h])=>[k,{...h,m:h.diag||(lanes[k]||[]).length>1?0:1}])),used,hid:S.lines.some(l=>l.hidden),pass:passN,thru:new Set([...passN].filter(i=>!I[i]))};
+  return{paths,I,ends,lanes,lsh,hits:Object.fromEntries(Object.entries(hits).map(([k,h])=>[k,{...h,m:h.diag||(lanes[k]||[]).length>1?0:1}])),used,hid:S.lines.some(l=>l.hidden),pass:passN,thru:new Set([...passN].filter(i=>!I[i]))};
 }
 
 /* ---------- Zeichnen ---------- */
@@ -428,7 +454,7 @@ function eGeo(B,k){
   for(let i=0;i<P.length-1;i++){const l=Math.hypot(P[i+1].x-P[i].x,P[i+1].y-P[i].y);if(l>bl){bl=l;bi=i}}
   if(bl<=0)return;
   const p=P[bi],q=P[bi+1],u={x:(q.x-p.x)/bl,y:(q.y-p.y)/bl};
-  return{L,u,n:{x:-u.y,y:u.x},sg:(u.x>1e-6||(Math.abs(u.x)<1e-6&&u.y>0))?1:-1,c:{x:(p.x+q.x)/2,y:(p.y+q.y)/2}}; // sg: Pfeil nach rechts/unten = positiv
+  return{L,s:(B.lsh&&B.lsh[k]!=null)?B.lsh[k]:-(L.length-1)/2,u,n:{x:-u.y,y:u.x},sg:(u.x>1e-6||(Math.abs(u.x)<1e-6&&u.y>0))?1:-1,c:{x:(p.x+q.x)/2,y:(p.y+q.y)/2}}; // sg: Pfeil nach rechts/unten = positiv
 }
 function eBadges(B){
   let o=""; const gap=Math.max(...S.design.cats.map(c=>c.w))+3, bf=TP("badge"), fs=bf.size, bh=fs+7;
@@ -436,7 +462,7 @@ function eBadges(B){
     const {L,u,n,sg,c}=g, bw=l=>Math.max(bh*1.4,l.name.length*fs*.62+10), mw=Math.max(...L.map(bw))+4;
     let a=Math.atan2(u.y,u.x)*180/Math.PI; if(a>90)a-=180; if(a<=-90)a+=180;
     L.forEach((l,i)=>{ // abwechselnd in zwei Spalten, benachbarte Spuren liegen so nie nebeneinander
-      const m=i-(L.length-1)/2, t=(L.length>1?(i%2?.5:-.5)*mw:0)+g.sg*(v.o||0)*16, w=bw(l), x=c.x+u.x*t+n.x*m*gap, y=c.y+u.y*t+n.y*m*gap;
+      const m=i+g.s, t=(L.length>1?(i%2?.5:-.5)*mw:0)+g.sg*(v.o||0)*16, w=bw(l), x=c.x+u.x*t+n.x*m*gap, y=c.y+u.y*t+n.y*m*gap;
       o+=`<g transform="translate(${x} ${y}) rotate(${a})"><rect x="${-w/2}" y="${-bh/2}" width="${w}" height="${bh}" rx="${l.shape==="rect"?2:bh/2}" fill="${l.color}" stroke="#fff" stroke-width="1.5"/><text text-anchor="middle" dominant-baseline="central" font-family="${ff(bf.font)}" font-size="${fs}" font-weight="${bf.b?700:400}" fill="${ink(l.color)}">${esc(l.name)}</text></g>`;
     });
   });
@@ -445,7 +471,7 @@ function eBadges(B){
 function eZig(B){ // Kopplung: Zickzack zwischen zwei benachbarten Spuren
   let o=""; const gap=Math.max(...S.design.cats.map(c=>c.w))+3;
   Object.entries(S.zig||{}).forEach(([key,v])=>{const [k,i]=key.split("#"),g=eGeo(B,k); if(!g||+i+1>=g.L.length)return;
-    const {u,n,c}=g, m0=+i-(g.L.length-1)/2, h=v.len*G, N=Math.max(2,Math.round(h/6)), pts=[];
+    const {u,n,c}=g, m0=+i+g.s, h=v.len*G, N=Math.max(2,Math.round(h/6)), pts=[];
     for(let t=0;t<=N;t++){const d=-h/2+h*t/N+g.sg*(v.o||0)*16, m=m0+(t%2);pts.push(`${c.x+u.x*d+n.x*m*gap} ${c.y+u.y*d+n.y*m*gap}`)}
     o+=`<polyline points="${pts.join(" ")}" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/><polyline points="${pts.join(" ")}" fill="none" stroke="#222" stroke-width="1.8" stroke-linejoin="round"/>`;
   });
