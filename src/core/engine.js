@@ -7,7 +7,7 @@ const TN={stop:"Station normal",end:"Endstation",h1:"Überschrift 1",h2:"Übersc
 const T=(size,b=0,color="#111111")=>({font:"Segoe UI",size,color,b,i:0,u:0});
 const defDesign=()=>({cats:[{id:"c1",name:"Häufig bedient",w:8,dash:""},{id:"c2",name:"Selten bedient",w:5,dash:"dash"}],tpl:{stop:T(14),end:T(14,1),h1:T(30,1),h2:T(22,1),sub:T(16,0,"#555555"),text:T(13),en:{...T(15,0,"#777777"),i:1},water:{...T(14,0,"#4a86b8"),i:1},area:{...T(15,1,"#8a8a8a")},badge:T(10,1),leg:T(13),arrow:T(14)},ostyles:[{id:"o1",name:"Fluss",color:"#7ab8e8",w:6,dash:"",smooth:0,area:0},{id:"o2",name:"Ländergrenze",color:"#9a9a9a",w:3,dash:"dash",smooth:0,area:0},{id:"o3",name:"Bahnstrecke (nicht bedient)",color:"#6b6b6b",w:5,dash:"",smooth:0,area:0}]});
 const DT=defDesign().tpl;
-const empty=d=>({design:d||defDesign(),lanes:"straight",title:{on:1,text:"Liniennetz",sub:"Regionalverkehr",x:1,y:1},legend:{on:1,x:44,y:2},stops:[],lines:[]});
+const empty=d=>({design:d||defDesign(),lanes:"straight",lineOutline:1,nameBg:0,title:{on:1,text:"Liniennetz",sub:"Regionalverkehr",x:1,y:1},legend:{on:1,x:44,y:2},stops:[],lines:[]});
 function load(){try{const s=JSON.parse(localStorage[KEY]);return s&&s.design?s:empty()}catch(e){return empty()}}
 let S=empty(), sel=null, drag=null, zoom=1, uid=Date.now()%100000, info={}, open={plan:1,design:1,draw:1,check:1};
 let cur=null, ustack=[], rstack=[], lastCh=0, sq="", dirty=false, fh=null;
@@ -45,7 +45,8 @@ const snap=()=>JSON.stringify(S,(k,v)=>k==="url"?undefined:v);
 const OSt=()=>S.design.ostyles||(S.design.ostyles=defDesign().ostyles), obj=i=>(S.objs||[]).find(o=>o.id===i);
 const fnMap=()=>{const m={};S.stops.filter(s=>s.fn&&s.fn.trim()).sort((a,b)=>a.name.localeCompare(b.name,"de")).forEach((s,i)=>m[s.id]=i+1);return m};
 const axisOf=u=>((Math.round(Math.atan2(u.y,u.x)/(Math.PI/4))%4)+4)%4;
-let LB={hits:{},lanes:{}}, popPos={x:200,y:200};
+let LB={hits:{},lanes:{}}, popPos={x:200,y:200}, NB=[], _cx=null;
+const tw=(t,tp)=>{try{if(!_cx&&typeof document!=="undefined")_cx=document.createElement("canvas").getContext("2d");if(_cx){_cx.font=`${tp.i?"italic ":""}${tp.b?700:400} ${tp.size}px ${tp.font}, Arial, sans-serif`;return _cx.measureText(t).width}}catch(e){}return String(t).length*tp.size*.56}; // Textbreite (Canvas, sonst Schätzung)
 const catOf=(l,si)=>S.design.cats.find(c=>c.id===(l.cats||[])[si])||S.design.cats[0];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -89,7 +90,7 @@ function build(ui){ // Ergebnis zwischenspeichern, solange sich Haltestellen, Li
   const B=build0(ui); BC={k,B}; return B;
 }
 function build0(ui){
-  const gap=Math.max(...S.design.cats.map(c=>c.w))+3, paths=[], used=new Set(), I={}, hits={}, lanes={}, lsh={}, ends={}, passN=new Set(), secs=[];
+  const gap=Math.max(...S.design.cats.map(c=>c.w))+3, paths=[], used=new Set(), I={}, hits={}, lanes={}, hl=[], sl=[], ends={}, passN=new Set(), secs=[];
   const eff=(l,si)=>{ // eigene Halte; bei „folgt Linie“ werden Zwischenhalte der Referenzlinie als Durchfahrt ergänzt
     const own=l.sections[si], R=(l.follow||{})[si]&&line(l.follow[si]), out=[];
     own.forEach((id,k)=>{
@@ -181,10 +182,39 @@ function build0(ui){
       for(let i=ai;i>0;i--) prop(run[i],run[i-1]);
     });
   }
+  /* Schritte je Verbindung (für die Kopplung) */
+  const est={};
+  secs.forEach(sec=>{for(let j=0;j<sec.M;j++){const q=sec.ekeys[j];if(est[q]&&est[q].sec!==sec)continue;
+    const e=est[q]=est[q]||{sec,f:sec.efws[j]>0,a:[]},P0=sec.gp[j],Q0=sec.gp[(j+1)%sec.N];
+    e.a.push({p:{x:P0.x*G,y:P0.y*G},q:{x:Q0.x*G,y:Q0.y*G},k:sec.keys[j][0],dx:sgn(Q0.x-P0.x),dy:sgn(Q0.y-P0.y)})}});
+  Object.values(est).forEach(e=>{if(!e.f){e.a.reverse();e.a.forEach(t=>{[t.p,t.q]=[t.q,t.p];t.dx=-t.dx;t.dy=-t.dy})}delete e.sec});
+  /* Äste: zusammenhängende Rasterschritte mit identischer Linienmenge, unabhängig davon, an wie vielen Haltestellen einzelne Linien dazwischen halten */
+  const asts={}, astOf={};
+  secs.forEach(sec=>{
+    const ks=[],sg=[]; for(let j=0;j<sec.M;j++){ks.push(sec.keys[j][0]);sg.push(use[ks[j]].map(e=>e.l.id).sort().join(","))}
+    sec.aid=[]; let a=0;
+    for(let j=1;j<=sec.M;j++){
+      if(j<sec.M&&sg[j]===sg[a])continue;
+      const mk=ks.slice(a,j).reduce((m,x)=>x<m?x:m), id=mk+"#"+sg[a];
+      for(let t=a;t<j;t++){sec.aid[t]=id;astOf[ks[t]]=id}
+      if(!asts[id]){const steps=[];for(let t=a;t<j;t++){const P0=sec.gp[t],Q0=sec.gp[(t+1)%sec.N];steps.push({p:{x:P0.x*G,y:P0.y*G},q:{x:Q0.x*G,y:Q0.y*G},k:ks[t],dx:sec.dirs[t].x,dy:sec.dirs[t].y})}asts[id]={id,steps}}
+      a=j;
+    }
+  });
   /* 3. Versetzte Pfade mit Ecken an den Schnittpunkten der Spuren */
   secs.forEach(sec=>{
     const {l,gp,at,dirs,N,M,cy}=sec, so=[], V=[];
-    for(let j=0;j<M;j++){const [k,fw]=sec.keys[j],arr=use[k],i=arr.findIndex(e=>e.l===l);so.push(fw*(i+off[k])*gap);if(!lanes[sec.ekeys[j]]){const ls=arr.map(e=>e.l);lanes[sec.ekeys[j]]=fw*sec.efws[j]<0?ls.reverse():ls;lsh[sec.ekeys[j]]=fw*sec.efws[j]>0?off[k]:-(arr.length-1)-off[k]}}
+    for(let j=0;j<M;j++){const [k,fw]=sec.keys[j],arr=use[k],i=arr.findIndex(e=>e.l===l);so.push(fw*(i+off[k])*gap);if(!lanes[sec.ekeys[j]]){const ls=arr.map(e=>e.l);lanes[sec.ekeys[j]]=fw*sec.efws[j]<0?ls.reverse():ls}}
+    { // Klickflächen entlang der tatsächlichen Spur dieser Linie, je Verbindung und Ast (so bleiben überlagerte Verbindungen einzeln anklickbar)
+      let g=null;
+      for(let j=0;j<M;j++){
+        const e=sec.ekeys[j], a=sec.aid[j], d=dirs[j], Ld=Math.hypot(d.x,d.y), nx=-d.y/Ld, ny=d.x/Ld, P0=gp[j], Q0=gp[(j+1)%N],
+          pt=`${P0.x*G+nx*so[j]},${P0.y*G+ny*so[j]} ${Q0.x*G+nx*so[j]},${Q0.y*G+ny*so[j]}`;
+        if(g&&g.e===e&&g.a===a) g.p+=" "+pt; else{g={e,a,w:sec.w,p:pt};hl.push(g)}
+      }
+    }
+    /* vollständiger Spurverlauf dieser Linie (für Badges, die über den Ast hinaus verschoben werden) */
+    sl.push({l,aid:sec.aid,steps:Array.from({length:M},(_,j)=>{const P0=gp[j],Q0=gp[(j+1)%N];return{p:{x:P0.x*G,y:P0.y*G},q:{x:Q0.x*G,y:Q0.y*G},dx:dirs[j].x,dy:dirs[j].y,k:sec.keys[j][0],so:so[j]}})});
     const sg=j=>{const d=dirs[j],L=Math.hypot(d.x,d.y),u={x:d.x/L,y:d.y/L};return{u,n:{x:-u.y,y:u.x}}};
     for(let j=0;j<N;j++){
       const ii=cy?(j-1+M)%M:j-1, oi=j<M?j:-1, A=ii>=0?sg(ii):null, B=oi>=0?sg(oi):null, v={x:gp[j].x*G,y:gp[j].y*G}, nd=at[j];
@@ -226,7 +256,7 @@ function build0(ui){
     sec.V.forEach(p=>{if(p.ck)p.r=Math.max(3,p.rin+mx[p.ck]-p.inn)});
     if(sec.V.length>1) paths.push({d:pathD(sec.V,sec.cy&&sec.V.length>2),color:sec.l.color,w:sec.w,dash:sec.cat.dash,lid:sec.l.id});
   });
-  return{paths,I,ends,lanes,lsh,hits:Object.fromEntries(Object.entries(hits).map(([k,h])=>[k,{...h,m:h.diag||(lanes[k]||[]).length>1?0:1}])),used,hid:S.lines.some(l=>l.hidden),pass:passN,thru:new Set([...passN].filter(i=>!I[i]))};
+  return{paths,I,ends,lanes,est,use,off,asts,astOf,hl,sl,hits:Object.fromEntries(Object.entries(hits).map(([k,h])=>[k,{...h,m:h.diag||(lanes[k]||[]).length>1?0:1}])),used,hid:S.lines.some(l=>l.hidden),pass:passN,thru:new Set([...passN].filter(i=>!I[i]))};
 }
 
 /* ---------- Zeichnen ---------- */
@@ -289,6 +319,10 @@ function stopSvg(n,ui,ends,lab){
       const H=nh+2+bB;
       if(under){if(S.bCenter)ty=mid.y-H/2+nh/2;by=ty+nh/2+2}
       else if(S.bCenter){ty=mid.y+H/2-nh/2;by=ty-nh/2-2-bB}
+    }
+    if(S.nameBg>0&&(s.nb===1||(s.nb==null&&S.nameBgAll!==0))){ // halbtransparente Hinterlegung des Namens (Stärke global, Anwendung je Haltestelle)
+      const nm=brk(s.name), lh=tp.size*1.2, w=Math.max(...nm.map(t=>tw(t,tp)))+(FN[s.id]?tp.size*.5:0), px=3, py=2, x0=ax==="start"?tx:ax==="end"?tx-w:tx-w/2, hh=(nm.length-1)*lh+tp.size*1.15;
+      NB.push(`<rect x="${x0-px}" y="${ty-hh/2-py}" width="${w+2*px}" height="${hh+2*py}" rx="2" fill="#fff" fill-opacity="${S.nameBg/100}" pointer-events="none"/>`);
     }
     o+=mlines(tx,ty,brk(s.name),tp.size*1.2,`text-anchor="${ax}" dominant-baseline="middle" ${ts(tp)}`,FN[s.id]?`<tspan dy="-0.5em" font-size="${Math.round(tp.size*.7)}">${FN[s.id]}</tspan>`:"");
     rows.forEach((rw,ri)=>{
@@ -420,18 +454,21 @@ function svgMarkup(ui){
   if(ui) out+=`<defs><pattern id="gd" x="-16" y="-16" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.2" fill="#ccc"/></pattern></defs><rect x="-16" y="-16" width="${W+32}" height="${H+32}" fill="url(#gd)"/>`;
   out+=imgSvg(ui,0);out+=objSvg(ui);
   if(ui&&hl&&hl.l)B.paths.filter(p=>p.lid===hl.l).forEach(p=>out+=`<path d="${p.d}" fill="none" stroke="#ffc400" stroke-opacity=".55" stroke-width="${p.w+14}" stroke-linecap="round" stroke-linejoin="round"/>`);
-  [1,0].forEach(ol=>B.paths.forEach(p=>{ // erst alle weißen Umrandungen (1 px je Seite), dann die Linien
-    const dd=p.dash==="dash"?"14 9":p.dash==="dot"?"1 10":"";
-    out+=`<path d="${p.d}" fill="none" stroke="${ol?"#fff":p.color}" stroke-width="${p.w+(ol?4:0)}" stroke-linejoin="round" stroke-linecap="${p.dash==="dash"?"butt":"round"}"${dd?` stroke-dasharray="${dd}"`:""}/>`;
-  }));
+  const zl=id=>(line(id)||{}).z||0, PP=[...B.paths].sort((x,y)=>zl(x.lid)-zl(y.lid)); // Ebene je Linie (stabil: Standard = Reihenfolge der Linien)
+  const pth=(p,ol)=>{const dd=p.dash==="dash"?"14 9":p.dash==="dot"?"1 10":"";
+    return `<path d="${p.d}" fill="none" stroke="${ol?"#fff":p.color}" stroke-width="${p.w+(ol?4:0)}" stroke-linejoin="round" stroke-linecap="${p.dash==="dash"?"butt":"round"}"${dd?` stroke-dasharray="${dd}"`:""}/>`};
+  if(S.lineOutline) PP.forEach(p=>{out+=pth(p,1)+pth(p,0)}); // jede Linie mit eigenem weißen Rahmen: oben liegende Linien trennen sich sichtbar von den unteren
+  else [1,0].forEach(ol=>PP.forEach(p=>{out+=pth(p,ol)})); // wie bisher: erst alle Umrandungen, dann alle Linien
   out+=eZig(B);out+=eBadges(B);const gw=Math.max(...S.design.cats.map(c=>c.w))+3;
-  if(ui) Object.entries(B.hits).forEach(([k,h])=>out+=`<polyline data-e="${k}"${h.m?' data-m="1"':''} points="${h.p}" fill="none" stroke="transparent" stroke-width="${14+((B.lanes[k]||[]).length)*gw}" style="cursor:pointer"/>`);
+  if(ui) B.hl.forEach(h=>out+=`<polyline data-e="${h.e}~${esc(h.a)}"${B.hits[h.e]&&B.hits[h.e].m?' data-m="1"':''} points="${h.p}" fill="none" stroke="transparent" stroke-width="${Math.max(14,h.w+8)}" stroke-linejoin="round" stroke-linecap="round" style="cursor:pointer"/>`);
   const sp=SP();
   S.stops.forEach(s=>{const ns=nodes(s).filter(n=>n.x!=null);
     for(let i=1;i<ns.length;i++){const r=route(ns[i-1],ns[i]).map((p,j,ar)=>({x:p.x*G,y:p.y*G,r:j&&j<ar.length-1?RAD:0}));out+=`<path d="${pathD(r,false)}" fill="none" stroke="${sp.cc}" stroke-width="${sp.cw}" stroke-linejoin="round"/>`}});
+  let sg=""; NB=[];
   S.stops.forEach(s=>nodes(s).filter(n=>n.x!=null&&!(ui&&B.hid&&!s.wp&&!B.used.has(s.id))&&(s.wp||!(B.thru.has(n.id)&&!B.I[n.id]))).forEach((n,i)=>{
-    if(s.wp){if(ui){const x=n.x*G,y=n.y*G;out+=`<g data-s="${n.id}" style="cursor:move"><path d="M${x-7} ${y}L${x} ${y-7}L${x+7} ${y}L${x} ${y+7}Z" fill="#fff" stroke="${sel===n.id?"#0f6cbd":"#999"}" stroke-width="2"/></g>`}return}
-    out+=stopSvg(n,ui,B.ends,i===0)}));
+    if(s.wp){if(ui){const x=n.x*G,y=n.y*G;sg+=`<g data-s="${n.id}" style="cursor:move"><path d="M${x-7} ${y}L${x} ${y-7}L${x+7} ${y}L${x} ${y+7}Z" fill="#fff" stroke="${sel===n.id?"#0f6cbd":"#999"}" stroke-width="2"/></g>`}return}
+    sg+=stopSvg(n,ui,B.ends,i===0)}));
+  out+=NB.join("")+sg; // Namenshinterlegungen liegen unter allen Haltestellen und Beschriftungen
   out+=imgSvg(ui,1);out+=freeSvg(ui)+imgHandles(ui);
   if(ui&&hl&&hl.s){const p=posOf(hl.s);if(p&&p.x!=null)out+=`<circle cx="${p.x*G}" cy="${p.y*G}" r="30" fill="none" stroke="#ffc400" stroke-width="5"><animate attributeName="r" values="14;34;14" dur="1s" repeatCount="2"/></circle>`}
   if(ui) out+=selSvg();
@@ -449,31 +486,71 @@ function demo(){
     {id:id(),name:"S 1",color:"#2a9d4a",shape:"pill",closed:true,cats:["c1"],dir:{},sections:[["Erfurt","Weimar","Ilmenau","Arnstadt"].map(i)]}];
   return d;
 }
-function eGeo(B,k){
-  const h=B.hits[k],L=B.lanes[k]; if(!h||!L||!L.length)return;
-  const P=h.cp; let bi=0,bl=-1;
-  for(let i=0;i<P.length-1;i++){const l=Math.hypot(P[i+1].x-P[i].x,P[i+1].y-P[i].y);if(l>bl){bl=l;bi=i}}
-  if(bl<=0)return;
-  const p=P[bi],q=P[bi+1],u={x:(q.x-p.x)/bl,y:(q.y-p.y)/bl};
-  return{L,s:(B.lsh&&B.lsh[k]!=null)?B.lsh[k]:-(L.length-1)/2,u,n:{x:-u.y,y:u.x},sg:(u.x>1e-6||(Math.abs(u.x)<1e-6&&u.y>0))?1:-1,c:{x:(p.x+q.x)/2,y:(p.y+q.y)/2}}; // sg: Pfeil nach rechts/unten = positiv
+/* Ast zu einem gespeicherten Schlüssel (neu: "Rasterschritt#Linien", alt: Verbindungsschlüssel) */
+const astKeyOf=(B,key)=>{if(B.asts[key])return key;if(key.indexOf("#")<0){const e=B.est&&B.est[key];if(e&&e.a.length)return B.astOf[e.a[Math.floor((e.a.length-1)/2)].k]}return null};
+/* längster geradliniger Abschnitt (ähnlich lang: der zur Mitte nächste), nur Schritte, die ok() erfüllen */
+function runPick(a,ok){
+  const mid=(a.length-1)/2, runs=[]; let best=null;
+  a.forEach((t,i)=>{if(!ok(t))return;const r=runs[runs.length-1];if(r&&r.b===i-1&&r.dx===t.dx&&r.dy===t.dy)r.b=i;else runs.push({a:i,b:i,dx:t.dx,dy:t.dy})});
+  const sc=r=>[r.b-r.a+1,-Math.abs((r.a+r.b)/2-mid)];
+  runs.forEach(r=>{if(!best)best=r;else{const x=sc(r),y=sc(best);if(x[0]>y[0]||(x[0]===y[0]&&x[1]>y[1]))best=r}});
+  return best;
+}
+function runGeo(a,best){
+  const f0=a[best.a], l0=a[best.b], h=Math.hypot(best.dx,best.dy), u={x:best.dx/h,y:best.dy/h};
+  return{u,n:{x:-u.y,y:u.x},sg:(u.x>1e-6||(Math.abs(u.x)<1e-6&&u.y>0))?1:-1,c:{x:(f0.p.x+l0.q.x)/2,y:(f0.p.y+l0.q.y)/2},ms:a[Math.floor((best.a+best.b)/2)]};
+}
+/* Spurposition (in Spurabständen, quer zur Richtung u) einer Linie auf einem Rasterschritt */
+function laneM(B,ms,l){
+  const [ka,kb]=ms.k.split("|").map(z=>z.split(",").map(Number)), s=(Math.sign(kb[0]-ka[0])*ms.dx+Math.sign(kb[1]-ka[1])*ms.dy)>0?1:-1, i=B.use[ms.k].findIndex(e=>e.l===l);
+  return i<0?null:s*(i+B.off[ms.k]);
 }
 function eBadges(B){
-  let o=""; const gap=Math.max(...S.design.cats.map(c=>c.w))+3, bf=TP("badge"), fs=bf.size, bh=fs+7;
-  Object.entries(S.ebadge||{}).forEach(([k,v])=>{const g=eGeo(B,k); if(!g)return;
-    const {L,u,n,sg,c}=g, bw=l=>Math.max(bh*1.4,l.name.length*fs*.62+10), mw=Math.max(...L.map(bw))+4;
-    let a=Math.atan2(u.y,u.x)*180/Math.PI; if(a>90)a-=180; if(a<=-90)a+=180;
-    L.forEach((l,i)=>{ // abwechselnd in zwei Spalten, benachbarte Spuren liegen so nie nebeneinander
-      const m=i+g.s, t=(L.length>1?(i%2?.5:-.5)*mw:0)+g.sg*(v.o||0)*16, w=bw(l), x=c.x+u.x*t+n.x*m*gap, y=c.y+u.y*t+n.y*m*gap;
-      o+=`<g transform="translate(${x} ${y}) rotate(${a})"><rect x="${-w/2}" y="${-bh/2}" width="${w}" height="${bh}" rx="${l.shape==="rect"?2:bh/2}" fill="${l.color}" stroke="#fff" stroke-width="1.5"/><text text-anchor="middle" dominant-baseline="central" font-family="${ff(bf.font)}" font-size="${fs}" font-weight="${bf.b?700:400}" fill="${ink(l.color)}">${esc(l.name)}</text></g>`;
+  let o=""; const gap=Math.max(...S.design.cats.map(c=>c.w))+3, bf=TP("badge"), fs=bf.size, bh=fs+7, seen=new Set();
+  Object.entries(S.ebadge||{}).forEach(([key,v])=>{
+    const id=astKeyOf(B,key); if(!id||seen.has(id))return; seen.add(id);
+    const A=B.asts[id], T=A.steps, best=runPick(T,()=>true); if(!best)return;
+    const g=runGeo(T,best), L=B.use[g.ms.k].map(e=>({l:e.l,m:laneM(B,g.ms,e.l)})).sort((x,y)=>x.m-y.m);
+    const bw=l=>Math.max(bh*1.4,l.name.length*fs*.62+10), mw=Math.max(...L.map(e=>bw(e.l)))+4;
+    const hid=v.hide||[], nG=Math.max(1,Math.min(8,Math.round(v.n||1))), gapC=Math.max(0,+v.gap||0), runKeys=new Set(T.slice(best.a,best.b+1).map(t=>t.k));
+    L.forEach(({l},i)=>{
+      if(hid.includes(l.id))return;
+      const sc=B.sl.find(e=>e.l===l&&e.aid.includes(id)); if(!sc)return;
+      /* Jedes Badge läuft auf dem Weg seiner eigenen Linie (Bogenlänge der Rasterschritte), auch über das Astende hinaus; es dreht sich mit dem Verlauf */
+      const St=sc.steps, cum=[0]; St.forEach(t=>cum.push(cum[cum.length-1]+Math.hypot(t.q.x-t.p.x,t.q.y-t.p.y)));
+      const Lt=cum[cum.length-1]; let ja=-1,jb=-1,xa=Infinity,xb=-1;
+      St.forEach((t,j)=>{if(sc.aid[j]!==id)return;if(j<xa)xa=j;if(j>xb)xb=j;if(runKeys.has(t.k)){if(ja<0)ja=j;jb=j}});
+      if(xb<0)return; if(ja<0){ja=xa;jb=xb}
+      const rel=(St[ja].dx===best.dx&&St[ja].dy===best.dy)?1:-1, s0=(cum[ja]+cum[jb+1])/2, A0=cum[xa], A1=cum[xb+1];
+      /* Spur: je Schritt um die Spurlage versetzt, an Knicken am Schnittpunkt verbunden */
+      const sg=St.map(t=>{const h=Math.hypot(t.dx,t.dy),ux=t.dx/h,uy=t.dy/h;
+        return{ux,uy,ax:t.p.x-uy*t.so,ay:t.p.y+ux*t.so,bx:t.q.x-uy*t.so,by:t.q.y+ux*t.so}});
+      for(let j=0;j<sg.length-1;j++){const p=sg[j],q=sg[j+1],c=p.ux*q.uy-p.uy*q.ux;
+        if(Math.abs(c)>.05){const dx=q.ax-p.ax,dy=q.ay-p.ay,t=(dx*q.uy-dy*q.ux)/c,ix=p.ax+p.ux*t,iy=p.ay+p.uy*t;p.bx=ix;p.by=iy;q.ax=ix;q.ay=iy}}
+      const w=bw(l), col=(L.length>1?(i%2?.5:-.5)*mw:0)*rel, shift=g.sg*(v.o||0)*16*rel;
+      for(let c=0;c<nG;c++){
+        /* Abstand der Gruppen: automatisch gleichmäßig über den Ast, oder fest in Rasterkästchen um die Astmitte */
+        const base=nG===1?s0:gapC>0?s0+(c-(nG-1)/2)*gapC*G:A0+(c+.5)/nG*(A1-A0), raw=base+col+shift;
+        if(nG>1&&(raw<0||raw>Lt))continue; // Gruppen jenseits des Linienendes entfallen (statt sich am Ende zu stapeln)
+        const pos=Math.max(0,Math.min(Lt,raw));
+        let j=0; while(j<St.length-1&&pos>cum[j+1])j++;
+        const d=cum[j+1]-cum[j], f=d>0?Math.max(0,Math.min(1,(pos-cum[j])/d)):0, q=sg[j], x=q.ax+(q.bx-q.ax)*f, y=q.ay+(q.by-q.ay)*f;
+        let ang=Math.atan2(q.uy,q.ux)*180/Math.PI; if(ang>90)ang-=180; if(ang<=-90)ang+=180;
+        o+=`<g transform="translate(${x} ${y}) rotate(${ang})"><rect x="${-w/2}" y="${-bh/2}" width="${w}" height="${bh}" rx="${l.shape==="rect"?2:bh/2}" fill="${l.color}" stroke="#fff" stroke-width="1.5"/><text text-anchor="middle" dominant-baseline="central" font-family="${ff(bf.font)}" font-size="${fs}" font-weight="${bf.b?700:400}" fill="${ink(l.color)}">${esc(l.name)}</text></g>`;
+      }
     });
   });
   return o;
 }
 function eZig(B){ // Kopplung: Zickzack zwischen zwei benachbarten Spuren
   let o=""; const gap=Math.max(...S.design.cats.map(c=>c.w))+3;
-  Object.entries(S.zig||{}).forEach(([key,v])=>{const [k,i]=key.split("#"),g=eGeo(B,k); if(!g||+i+1>=g.L.length)return;
-    const {u,n,c}=g, m0=+i+g.s, h=v.len*G, N=Math.max(2,Math.round(h/6)), pts=[];
-    for(let t=0;t<=N;t++){const d=-h/2+h*t/N+g.sg*(v.o||0)*16, m=m0+(t%2);pts.push(`${c.x+u.x*d+n.x*m*gap} ${c.y+u.y*d+n.y*m*gap}`)}
+  Object.entries(S.zig||{}).forEach(([key,v])=>{
+    const [k,i]=key.split("#"), Ls=B.lanes[k], e=B.est[k]; if(!Ls||!e||+i+1>=Ls.length)return;
+    const la=Ls[+i], lb=Ls[+i+1], has=(t,l)=>B.use[t.k].some(x=>x.l===l);
+    const best=runPick(e.a,t=>has(t,la)&&has(t,lb))||runPick(e.a,()=>true); if(!best)return;
+    const g=runGeo(e.a,best), m0=laneM(B,g.ms,la), m1=laneM(B,g.ms,lb); if(m0==null||m1==null)return;
+    const {u,n,c}=g, h=v.len*G, N=Math.max(2,Math.round(h/6)), pts=[];
+    for(let t=0;t<=N;t++){const d=-h/2+h*t/N+g.sg*(v.o||0)*16, m=t%2?m1:m0;pts.push(`${c.x+u.x*d+n.x*m*gap} ${c.y+u.y*d+n.y*m*gap}`)}
     o+=`<polyline points="${pts.join(" ")}" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/><polyline points="${pts.join(" ")}" fill="none" stroke="#222" stroke-width="1.8" stroke-linejoin="round"/>`;
   });
   return o;
@@ -528,7 +605,7 @@ export{svgMarkup,demo,empty,defDesign,stop as stopOf,line as lineOf,posOf,PAL,DI
 const s45c=(o,c,j)=>{const p=o.s45&&o.pts[j==null?o.pts.length-1:j-1];if(!p)return c;const dx=c.x-p.x,dy=c.y-p.y,ax=Math.abs(dx),ay=Math.abs(dy);if(ay<=ax*.4142)return{x:c.x,y:p.y};if(ax<=ay*.4142)return{x:p.x,y:c.y};const m=Math.round((ax+ay)/2);return{x:p.x+Math.sign(dx)*m,y:p.y+Math.sign(dy)*m}};
 export{s45c,catOf,OSt,obj};export const getLB=()=>LB;
 
-export{TN,LT,TR,TP};
+export{TN,LT,TR,TP,astKeyOf};
 
 export{labelsOf};
 

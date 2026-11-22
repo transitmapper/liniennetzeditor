@@ -1,5 +1,5 @@
 import React,{useState} from "react";
-import {Button,TabList,Tab,Label} from "@fluentui/react-components";
+import {Button,TabList,Tab,Label,Slider} from "@fluentui/react-components";
 import {useStore} from "./store.js";
 import {Shell,R,Tx,Sl,Ck,Co,Ta} from "./ui.jsx";
 import {setS,SP,TP,TN,LT,TR,OSt,defDesign,newId,pageSync,DIRS,getLB,TNs} from "./core/engine.js";
@@ -54,9 +54,14 @@ export function PlanDialog(){
     <Sec t="Linien und Linienbündel">
       <Sl l="Linienbündel" v={S.lanes||"center"} on={v=>e(D=>{D.lanes=v})} o={[["center","zentriert (wie bisher)"],["straight","geradlinig bevorzugen"]]}/>
       {S.lanes==="straight"&&<Sl l="Max. Abweichung von der Rasterlinie" v={String(S.laneMax==null?1.5:S.laneMax)} on={v=>e(D=>{D.laneMax=+v})} o={[["0.5","0,5 Spuren"],["1","1 Spur"],["1.5","1,5 Spuren"],["2","2 Spuren"],["3","3 Spuren"],["99","unbegrenzt"]]}/>}
+      <Full><Ck v={S.lineOutline} on={v=>u("lineOutline",v)} t="Überlagerte Linien mit weißem Rahmen abgrenzen (die oben liegende Linie trennt sich sichtbar von der unteren; Ebene je Linie unter „Linien bearbeiten“)"/></Full>
       <Full><Ck v={S.sortImp} on={v=>u("sortImp",v)} t="Linien in Legende und Übersicht nach Wichtigkeit sortieren"/></Full>
     </Sec>
     <Sec t="Haltestellenbeschriftung und Linienbadges">
+      <Full><Label size="small">Hinterlegung der Haltestellennamen (weiß, Deckkraft): {S.nameBg||0} %</Label>
+        <Slider min={0} max={100} step={10} value={S.nameBg||0} onChange={(_,d)=>u("nameBg",d.value)} style={{width:"100%"}}/>
+        <div style={{fontSize:12,opacity:.7}}>Stärke für den ganzen Plan; 0 % = keine Hinterlegung. Ob ein Name hinterlegt wird, lässt sich je Haltestelle festlegen.</div></Full>
+      <Full><Ck v={S.nameBgAll!==0} on={v=>u("nameBgAll",v)} t="Standardmäßig alle Haltestellennamen hinterlegen (je Haltestelle änderbar)"/></Full>
       <Tx l="Badges pro Zeile (Endstationen)" t="number" v={S.bpr||6} on={v=>u("bpr",Math.max(1,Math.min(20,v)))}/>
       <Full><Ck v={S.bUnder} on={v=>u("bUnder",v)} t="Linienbadges unter dem Haltestellennamen (global, alle Ausrichtungen)"/></Full>
       <Full><Ck v={S.bCenter} on={v=>u("bCenter",v)} t="Name und Badges zur Haltestelle zentrieren (links/rechts)"/></Full>
@@ -73,7 +78,7 @@ export function StopDialog(){
     <R><Tx l="Neuer Name" v={nn} on={setNn}/><Button onClick={()=>add()}>Haltestelle</Button><Button onClick={()=>add(1)}>Wegpunkt</Button></R>
     <Sl l="Haltestelle wählen (danach auf den Plan klicken zum Setzen)" v={id||""} on={v=>set({sel:v||null})} o={[["","–"],...srt.map(x=>[x.id,(x.wp?"Wegpunkt: ":"")+x.name+(x.x==null?" (nicht gesetzt)":"")])]}/>
     {s&&<><R><Ta l="Name (Enter = Zeilenumbruch, mitten im Wort mit automatischem Bindestrich)" v={s.name} on={v=>up("name",v)}/></R>
-      {!s.wp&&<><R><Sl l="Beschriftung" v={s.label||"E"} on={v=>up("label",v)} o={Object.keys(DIRS).map(k=>[k,k])}/><Tx l="Textabstand (Linien)" t="number" w={90} v={s.ld||0} on={v=>up("ld",v)}/><Ck v={s.bold} on={v=>up("bold",v)} t="Fett"/><Sl l="Linienbadges" v={s.bu==null?"":String(s.bu)} on={v=>up("bu",v===""?undefined:+v)} o={[["","wie global"],["1","unter dem Namen"],["0","über dem Namen"]]}/></R>
+      {!s.wp&&<><R><Sl l="Beschriftung" v={s.label||"E"} on={v=>up("label",v)} o={Object.keys(DIRS).map(k=>[k,k])}/><Tx l="Textabstand (Linien)" t="number" w={90} v={s.ld||0} on={v=>up("ld",v)}/><Ck v={s.bold} on={v=>up("bold",v)} t="Fett"/><Sl l="Linienbadges" v={s.bu==null?"":String(s.bu)} on={v=>up("bu",v===""?undefined:+v)} o={[["","wie global"],["1","unter dem Namen"],["0","über dem Namen"]]}/><Sl l="Namenshinterlegung" v={s.nb==null?"":String(s.nb)} on={v=>up("nb",v===""?undefined:+v)} o={[["","wie Plan-Standard"],["1","an"],["0","aus"]]}/></R>
         <R><Tx l="Anmerkung (Fußnote)" v={s.fn||""} on={v=>up("fn",v)}/></R>
         <BadgeEditor id={id}/>
         <R><Button onClick={()=>{edit(D=>{const q=D.stops.find(x=>x.id===id);(q.alt=q.alt||[]).push({x:null,y:null});set({sel:id+"#"+q.alt.length})})}}>Standort aufsplitten</Button></R>
