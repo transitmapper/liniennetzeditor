@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Designing good transit maps: a practical guide | Liniennetz-Editor</title>
+<meta name="description" content="Practical tips for readable transit maps: angles, colours, line thickness, stops, labels and key, with a checklist before you export.">
+<link rel="canonical" href="https://transitmapper.github.io/liniennetzeditor/en/design-guide/">
+<link rel="alternate" hreflang="de" href="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<link rel="alternate" hreflang="en" href="https://transitmapper.github.io/liniennetzeditor/en/design-guide/">
+<link rel="alternate" hreflang="x-default" href="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<link rel="icon" href="../../favicon.svg">
+<meta property="og:type" content="article"><meta property="og:title" content="Designing good transit maps: a practical guide | Liniennetz-Editor"><meta property="og:description" content="Practical tips for readable transit maps: angles, colours, line thickness, stops, labels and key, with a checklist before you export."><meta property="og:url" content="https://transitmapper.github.io/liniennetzeditor/en/design-guide/">
+<meta property="og:image" content="https://transitmapper.github.io/liniennetzeditor/og-image.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../../landing.css"><link rel="stylesheet" href="../../seite.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Liniennetz-Editor", "item": "https://transitmapper.github.io/liniennetzeditor/en/"}, {"@type": "ListItem", "position": 2, "name": "Design guide", "item": "https://transitmapper.github.io/liniennetzeditor/en/design-guide/"}]}</script>
+<script data-goatcounter="https://liniennetzeditor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head><body>
+<header class="kopf">
+<a class="marke" href="../"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M2 24H16L26 14H38" fill="none" stroke="#d62828" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="5" fill="#fff" stroke="#1c2024" stroke-width="3"/></svg>Liniennetz-Editor</a>
+<nav><a class="text" href="../guide/">Guide</a><a class="text" href="../design-guide/">Design guide</a><a class="text" href="../faq/">FAQ</a><a class="text" href="../#beispiele">Examples</a>
+<span class="sprache"><a href="../../ratgeber/" hreflang="de" lang="de">DE</a> <a href="./" hreflang="en" lang="en" aria-current="page">EN</a></span>
+<a class="knopf" href="../../app/">Open the editor</a></nav>
+</header>
+<main class="doc"><nav class="krumen" aria-label="Breadcrumb"><a href="../">Home</a> › Design guide</nav><h1>Designing good transit maps</h1><p class="lead">Angles, colours, line thickness, labels: practical tips for maps that can be understood at a glance.</p><p>The points below are rules of thumb from practice, not strict standards. They help you make a map readable and consistent. Where the editor does the work for you, it says so.</p>
+<h2 id="r1">1. Diagram, not geography</h2>
+<p>A network map should give orientation, not reproduce geography. Distances and compass directions can be simplified as long as the order of stops, the interchanges and the relative position of lines are right. Plan the network first, then the looks.</p>
+<h2 id="r2">2. Only 0°, 45° and 90°</h2>
+<p>Restricted angles make maps calm and recognisable. The editor enforces this on the grid and rounds the bends. Avoid many short zigzag sections: a few clear bends read better than many small ones. If a connection looks awkward, move a stop by one grid square rather than forcing the route. In the connection menu you can flip the bend or switch to right-angle routing.</p>
+<h2 id="r3">3. Even spacing on the grid</h2>
+<p>Place stops at a steady rhythm (e.g. every second grid square) and leave room for labels. Interchanges need more space than intermediate stops. An even grid looks more professional than geographically accurate but uneven spacing.</p>
+<h2 id="r4">4. Choose colours carefully</h2>
+<ul><li><b>Few, clearly distinct colours.</b> The more lines, the harder it gets. Beyond about ten colours, numbered line badges help so that colour does not have to carry everything alone.</li><li><b>Consider colour vision deficiency.</b> Red and green next to each other are hard to tell apart for many people. Vary brightness as well.</li><li><b>Colour related lines similarly.</b> Lines of one product or operator may use related tones.</li><li><b>Contrast with the background.</b> Very light yellows vanish on white. In line badges the editor picks light or dark text automatically.</li></ul>
+<h2 id="r5">5. Line thickness and categories</h2>
+<p>Show importance through line thickness: thick lines for frequent service, thin or dashed ones for infrequent service. Two or three levels are enough. The editor uses categories for this (thickness, solid or dashed) and builds the key from them. Each section of a line can have its own category.</p>
+<h2 id="r6">6. Stops and interchanges</h2>
+<p>A simple circle is enough for a stop. Where several lines stop, a pill spans all lanes and makes the interchange visible. Mark stops served by only some lines on those lines only, so pass-through is obvious at a glance. Highlight important hubs and terminals with bold text.</p>
+<h2 id="r7">7. Labels</h2>
+<ul><li><b>Sans-serif, consistent.</b> A few weights are enough: regular for stops, bold for interchanges and terminals.</li><li><b>Prefer horizontal text.</b> Rotated text is harder to read. Use it only where there is no alternative.</li><li><b>Consistent positions.</b> Names on the same side of the route save search time. The editor suggests positions automatically and warns about overlaps.</li><li><b>Wrap long names</b> instead of shortening them. Use abbreviations only when widely known.</li><li><b>Check legibility at the target size.</b> What looks good on screen may be too small in print. Zoom out and print a test page.</li></ul>
+<h2 id="r8">8. Bundle parallel lines</h2>
+<p>When several lines share a route, they belong side by side at equal spacing. Keep the lane order constant across several sections so lines cross as little as possible. The editor orders lanes automatically and lets you change the order per connection. The “prefer straight” option avoids needless offsets when a line joins a bundle.</p>
+<h2 id="r9">9. Keep the background restrained</h2>
+<p>Rivers, borders and areas should help orientation without competing with the lines. Use light, desaturated colours and translucent areas, and send areas to the background. Label waters and regions in their own subtle text style.</p>
+<h2 id="r10">10. Title, key and line overview</h2>
+<p>A title with a validity date, a key showing only what appears on the map and, with many lines, a line overview with route descriptions make the map readable on its own. The editor generates the key from your network and hides unused symbols.</p>
+<h2 id="r11">Checklist before exporting</h2>
+<ul><li>All stops placed and assigned to at least one line (run the check)?</li><li>No overlapping labels?</li><li>Lines of equal importance equally thick, categories explained in the key?</li><li>Colours distinguishable in greyscale?</li><li>Title, date and source filled in?</li><li>Test print at the target size checked?</li></ul>
+<p>The <a href="../guide/">guide</a> shows how to implement these steps in the editor. Answers on export and printing are in the <a href="../faq/">FAQ</a>.</p>
+<p class="cta"><a class="knopf" href="../../app/">Open the editor</a> <a class="knopf leise" href="../guide/">Read the guide</a></p></main>
+<footer class="fuss"><a href="../guide/">Guide</a><a href="../design-guide/">Design guide</a><a href="../faq/">FAQ</a><a href="../publisher-alternative/">Publisher alternative</a><a href="../../impressum.html">Legal notice (German)</a><a href="../../datenschutz.html">Privacy (German)</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Report a bug</a><span>MIT licence</span></footer>
+</body></html>

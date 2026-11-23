@@ -19,7 +19,7 @@
 </head><body>
 <header class="kopf">
 <a class="marke" href="./"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M2 24H16L26 14H38" fill="none" stroke="#d62828" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="5" fill="#fff" stroke="#1c2024" stroke-width="3"/></svg>Liniennetz-Editor</a>
-<nav><a class="text" href="#beispiele">Examples</a><a class="text" href="#funktionen">Features</a>
+<nav><a class="text" href="guide/">Guide</a><a class="text" href="design-guide/">Design guide</a><a class="text" href="faq/">FAQ</a><a class="text" href="#beispiele">Examples</a>
 <span class="sprache"><a href="../" hreflang="de" lang="de" >DE</a> <a href="./" hreflang="en" lang="en" aria-current="page">EN</a></span>
 <a class="knopf" href="../app/">Open the editor</a></nav>
 </header>
@@ -51,7 +51,7 @@
 </svg>
 </section>
 <main class="strecke"><div class="spur" aria-hidden="true"></div>
-<section class="halt"><h2>Why this editor exists</h2><p>For many hobby planners, Microsoft Publisher was the tool of choice: simple enough for quick network maps, without the overhead of InDesign or Affinity. It was discontinued at the end of October 2026.</p><p>There was no fitting replacement, so this editor was built to do exactly that job, by someone who plans transit networks as a hobby.</p></section>
+<section class="halt"><h2>Why this editor exists</h2><p>For many hobby planners, Microsoft Publisher was the tool of choice: simple enough for quick network maps, without the overhead of InDesign or Affinity. It was discontinued at the end of October 2026.</p><p>There was no fitting replacement, so this editor was built to do exactly that job, by someone who plans transit networks as a hobby.</p><p><a href="publisher-alternative/">Read more: Publisher alternative →</a></p></section>
 <section class="halt"><h2>How a map comes together</h2>
 <ol class="schritte">
 <li><span class="pille p1">1</span><div><b>Describe the network</b>Create stops, give lines a colour and category, assign the stops each line serves.</div></li>
@@ -63,12 +63,14 @@
 <path class="l" pathLength="1" d="M45 135H135Q150 135 160 125L230 55"/>
 <g class="b"><circle class="h" cx="45" cy="135" r="11"/><text class="name" x="45" y="164" text-anchor="middle">Erfurt</text></g>
 <g class="b b2"><circle class="h" cx="230" cy="55" r="11"/><text class="name" x="230" y="32" text-anchor="middle">Weimar</text></g>
-</svg></section>
+</svg>
+<p><a href="guide/">Read more: The complete guide →</a></p>
+</section>
 <section class="halt" id="beispiele"><h2>Maps made with the editor</h2><p>Click a map to open it full size as SVG.</p><div class="plaene"><figure class="plan reveal" style="--c:#d62828"><a href="../plans/akkunetz.svg" target="_blank" rel="noopener"><img src="../plans/akkunetz.svg" alt="Mittelthüringer Akkunetz" loading="lazy"></a><figcaption><b>Mittelthüringer Akkunetz</b>Made with Liniennetz-Editor.</figcaption></figure><figure class="plan reveal" style="--c:#1d6fb8"><a href="../plans/ostthueringen.svg" target="_blank" rel="noopener"><img src="../plans/ostthueringen.svg" alt="Ostthüringennetz" loading="lazy"></a><figcaption><b>Ostthüringennetz</b>Made with Liniennetz-Editor.</figcaption></figure><figure class="plan reveal" style="--c:#2a9d4a"><a href="../plans/saale-suedharz.svg" target="_blank" rel="noopener"><img src="../plans/saale-suedharz.svg" alt="Saale-Thüringen-Südharz-Netz" loading="lazy"></a><figcaption><b>Saale-Thüringen-Südharz-Netz</b>Made with Liniennetz-Editor.</figcaption></figure></div></section>
 <section class="halt" id="funktionen"><h2>What it can do</h2><ul class="funktionen"><li>Lines with trunk, branches and loops</li><li>Parallel lines are bundled, lane order is adjustable</li><li>Split stops and waypoints</li><li>Direction-only stops, temporary service and pass-through stops</li><li>Key and line overview are generated automatically</li><li>Rivers, borders and areas as drawing objects, with labels</li><li>Text styles and designs you can save and reuse</li><li>Automatic label placement with overlap check</li><li>CSV import and background image as tracing template</li><li>Undo and redo, selection mode, export and import parts of a network</li></ul></section>
-<section class="halt"><h2>Free and local</h2><p>The editor runs entirely in your browser. There is no sign-up and no server that sees your maps. Projects are saved as files on your computer.</p><p>The source code is on GitHub under the MIT licence. Report bugs and ideas there as an issue. <a href="https://github.com/transitmapper/liniennetzeditor">Source code on GitHub</a></p></section>
+<section class="halt"><h2>Free and local</h2><p>The editor runs entirely in your browser. There is no sign-up and no server that sees your maps. Projects are saved as files on your computer.</p><p>The source code is on GitHub under the MIT licence. Report bugs and ideas there as an issue. <a href="https://github.com/transitmapper/liniennetzeditor">Source code on GitHub</a></p><p><a href="faq/">Read more: Frequently asked questions (FAQ) →</a></p><p><a href="ratgeber/">How-to: Good transit maps →</a></p></section>
 <section class="halt end"><h2>Terminus: get started</h2><div class="badges"><span class="pille p1">RE 1</span><span class="pille p2">RE 2</span><span class="pille p3">S 1</span></div><p>The sample network in the editor shows in a minute how everything fits together.</p><p><a class="knopf" href="../app/">Open the editor</a></p></section>
 </main>
-<footer class="fuss"><a href="../impressum.html">Legal notice (German)</a><a href="../datenschutz.html">Privacy (German)</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Report a bug</a><span>MIT licence</span></footer>
+<footer class="fuss"><a href="anleitung/">Anleitung</a><a href="ratgeber/">Ratgeber</a><a href="faq/">FAQ</a><a href="publisher-alternative/">Publisher-Alternative</a><a href="../impressum.html">Legal notice (German)</a><a href="../datenschutz.html">Privacy (German)</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Report a bug</a><span>MIT licence</span></footer>
 <script src="../landing.js"></script>
 </body></html>

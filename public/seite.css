@@ -1,0 +1,22 @@
+/* Zusatzstile für Unterseiten (Anleitung, Publisher-Alternative, …) – ergänzt landing.css */
+.doc{max-width:880px;margin:0 auto;padding:28px clamp(16px,4vw,48px) 64px;background:var(--weiss)}
+.krumen{font-size:15px;color:var(--grau);margin:0 0 18px}
+.doc h1{font:700 clamp(30px,4.8vw,48px)/1.1 var(--kopf);margin:0 0 16px;letter-spacing:-.01em}
+.doc h2{font:700 clamp(22px,3vw,30px)/1.2 var(--kopf);margin:40px 0 10px}
+.doc .lead{font-size:19px;color:var(--grau);max-width:36em}
+.doc ul,.doc ol:not(.s){padding-left:1.3em}.doc li{margin:0 0 8px}
+.doc code{background:var(--grund);padding:1px 6px;border-radius:4px;font-size:.92em}
+.doc ol.s{list-style:none;counter-reset:s;padding:0;margin:30px 0 0}
+.doc ol.s>li{counter-increment:s;position:relative;padding-left:58px;margin:0 0 36px}
+.doc ol.s>li::before{content:counter(s);position:absolute;left:0;top:2px;min-width:42px;height:28px;box-sizing:border-box;text-align:center;color:#fff;background:var(--rot);font:700 16px/28px var(--kopf);border-radius:14px}
+.doc ol.s>li:nth-child(3n+2)::before{background:var(--blau)}.doc ol.s>li:nth-child(3n)::before{background:var(--gruen)}
+.doc ol.s>li>h2{margin:0 0 10px;font-size:clamp(20px,2.6vw,26px)}
+.shot{margin:16px 0 0}.shot img{display:block;width:100%;height:auto;border:1px solid var(--spur);border-radius:6px}
+.tipp{border-left:6px solid var(--blau);background:var(--grund);padding:10px 14px;border-radius:0 6px 6px 0}
+.vgl{width:100%;border-collapse:collapse;margin:16px 0;font-size:16px;display:block;overflow-x:auto}
+.vgl th,.vgl td{border-bottom:1px solid var(--spur);padding:10px 12px;text-align:left;vertical-align:top}
+.vgl thead th{border-bottom:3px solid var(--tinte)}.vgl tbody th{font-weight:600;white-space:nowrap}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.toc{background:var(--grund);border-radius:6px;padding:14px 18px 14px 36px;margin:22px 0 0;font-size:16px}
+.toc li{margin:0 0 4px}
+.doc h2[id]{scroll-margin-top:16px}

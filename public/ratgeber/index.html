@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gute Liniennetzpläne gestalten: Ratgeber | Liniennetz-Editor</title>
+<meta name="description" content="Praxis-Tipps für lesbare Liniennetzpläne: Winkel, Farben, Strichstärken, Haltestellen, Beschriftung und Legende, mit Checkliste vor dem Export.">
+<link rel="canonical" href="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<link rel="alternate" hreflang="de" href="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<link rel="alternate" hreflang="en" href="https://transitmapper.github.io/liniennetzeditor/en/design-guide/">
+<link rel="alternate" hreflang="x-default" href="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<link rel="icon" href="../favicon.svg">
+<meta property="og:type" content="article"><meta property="og:title" content="Gute Liniennetzpläne gestalten: Ratgeber | Liniennetz-Editor"><meta property="og:description" content="Praxis-Tipps für lesbare Liniennetzpläne: Winkel, Farben, Strichstärken, Haltestellen, Beschriftung und Legende, mit Checkliste vor dem Export."><meta property="og:url" content="https://transitmapper.github.io/liniennetzeditor/ratgeber/">
+<meta property="og:image" content="https://transitmapper.github.io/liniennetzeditor/og-image.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../landing.css"><link rel="stylesheet" href="../seite.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Liniennetz-Editor", "item": "https://transitmapper.github.io/liniennetzeditor/"}, {"@type": "ListItem", "position": 2, "name": "Ratgeber", "item": "https://transitmapper.github.io/liniennetzeditor/ratgeber/"}]}</script>
+<script data-goatcounter="https://liniennetzeditor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head><body>
+<header class="kopf">
+<a class="marke" href="../"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M2 24H16L26 14H38" fill="none" stroke="#d62828" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="5" fill="#fff" stroke="#1c2024" stroke-width="3"/></svg>Liniennetz-Editor</a>
+<nav><a class="text" href="../anleitung/">Anleitung</a><a class="text" href="../ratgeber/">Ratgeber</a><a class="text" href="../faq/">FAQ</a><a class="text" href="../#beispiele">Beispiele</a>
+<span class="sprache"><a href="./" hreflang="de" lang="de" aria-current="page">DE</a> <a href="../en/design-guide/" hreflang="en" lang="en">EN</a></span>
+<a class="knopf" href="../app/">Editor öffnen</a></nav>
+</header>
+<main class="doc"><nav class="krumen" aria-label="Brotkrumen"><a href="../">Start</a> › Ratgeber</nav><h1>Gute Liniennetzpläne gestalten</h1><p class="lead">Winkel, Farben, Strichstärken, Beschriftung: Praxis-Tipps für Pläne, die man auf einen Blick versteht.</p><p>Die folgenden Punkte sind Faustregeln aus der Praxis, keine starren Normen. Sie helfen dir, einen Plan lesbar und einheitlich zu gestalten. Wo der Editor dir Arbeit abnimmt, steht es dabei.</p>
+<h2 id="r1">1. Schema statt Landkarte</h2>
+<p>Ein Liniennetzplan soll Orientierung bieten, keine Geografie abbilden. Entfernungen und Himmelsrichtungen dürfen vereinfacht werden, solange die Reihenfolge der Halte, die Umstiege und die Lage der Linien zueinander stimmen. Plane zuerst das Netz, dann die Optik.</p>
+<h2 id="r2">2. Nur 0°, 45° und 90°</h2>
+<p>Eingeschränkte Winkel machen Pläne ruhig und wiedererkennbar. Der Editor erzwingt das auf dem Raster und rundet die Knicke. Vermeide viele kurze Zickzack-Abschnitte: Wenige, klare Knicke lesen sich besser als viele kleine. Wenn eine Verbindung unschön ausfällt, verschiebst du am besten eine Haltestelle um ein Kästchen, statt den Verlauf zu erzwingen. Über das Verbindungsmenü legst du bei Bedarf den Knick um oder stellst auf rechtwinklig.</p>
+<h2 id="r3">3. Gleichmäßige Abstände auf dem Raster</h2>
+<p>Halte sie in einem festen Takt zu setzen (z. B. jede zweite Rasterzelle) und lasse Platz für die Beschriftung. Umsteigeknoten brauchen mehr Raum als Zwischenhalte. Ein gleichmäßiges Raster wirkt professioneller als geografisch genaue, aber ungleichmäßige Abstände.</p>
+<h2 id="r4">4. Farben mit Bedacht wählen</h2>
+<ul><li><b>Wenige, deutlich unterscheidbare Farben.</b> Je mehr Linien, desto schwerer wird es. Ab etwa zehn Farben helfen Linienbadges mit Nummer, damit die Farbe nicht allein tragen muss.</li><li><b>Farbenfehlsichtigkeit bedenken.</b> Rot und Grün direkt nebeneinander sind für viele Menschen schwer zu trennen. Variiere zusätzlich in der Helligkeit.</li><li><b>Zusammengehörendes ähnlich färben.</b> Linien eines Produkts oder Betreibers dürfen verwandte Töne haben.</li><li><b>Kontrast zum Hintergrund.</b> Zu helle Gelbtöne verschwinden auf Weiß. Im Linienbadge wählt der Editor die Schriftfarbe automatisch hell oder dunkel.</li></ul>
+<h2 id="r5">5. Strichstärken und Kategorien</h2>
+<p>Zeige Wichtigkeit über die Linienstärke: Dicke Linien für häufig bediente Strecken, dünne oder gestrichelte für selten bediente. Zwei bis drei Stufen reichen. Der Editor kennt dafür Kategorien (Stärke, durchgezogen oder gestrichelt) und erzeugt die Legende daraus. Jeder Abschnitt einer Linie kann eine eigene Kategorie haben.</p>
+<h2 id="r6">6. Haltestellen und Umstiege</h2>
+<p>Ein einfacher Kreis genügt für einen Halt. Wo mehrere Linien halten, fasst eine Pille alle Spuren zusammen und macht den Umstieg sichtbar. Zeichne Haltestellen, an denen nur einzelne Linien halten, nur an diesen Linien. So erkennt man Durchfahrten sofort. Hebe wichtige Knoten und Endstationen durch fetten Text hervor.</p>
+<h2 id="r7">7. Beschriftung</h2>
+<ul><li><b>Serifenlose Schrift, einheitlich.</b> Wenige Schnitte genügen: normal für Halte, fett für Umsteige- und Endstationen.</li><li><b>Waagerecht bevorzugen.</b> Gedrehter Text ist schwerer zu lesen. Nutze ihn nur dort, wo es nicht anders geht.</li><li><b>Konsistente Positionen.</b> Namen immer auf derselben Seite der Strecke sparen Suchzeit. Der Editor schlägt Positionen automatisch vor und warnt bei Überlappungen.</li><li><b>Lange Namen umbrechen</b>, statt sie zu kürzen. Abkürzungen nur, wenn sie allgemein bekannt sind.</li><li><b>Lesbarkeit im Zielformat prüfen.</b> Was am Bildschirm gut aussieht, kann gedruckt zu klein sein. Zoome heraus und drucke eine Probeseite.</li></ul>
+<h2 id="r8">8. Parallele Linien bündeln</h2>
+<p>Laufen mehrere Linien auf derselben Strecke, gehören sie nebeneinander mit gleichem Abstand. Halte die Reihenfolge der Spuren über mehrere Abschnitte konstant, damit sich Linien möglichst nicht kreuzen. Der Editor ordnet automatisch und lässt dir die Reihenfolge je Verbindung ändern. Die Option „Geradlinig bevorzugen“ vermeidet unnötige Versätze, wenn eine Linie zu einem Bündel stößt.</p>
+<h2 id="r9">9. Hintergrund zurückhaltend gestalten</h2>
+<p>Flüsse, Grenzen und Flächen sollen helfen, sich zurechtzufinden, aber nicht mit den Linien konkurrieren. Nutze helle, entsättigte Farben und transparente Flächen und stelle Flächen in den Hintergrund. Beschrifte Gewässer und Gebiete in einem eigenen, dezenten Schriftstil.</p>
+<h2 id="r10">10. Titel, Legende und Linienübersicht</h2>
+<p>Titel mit Gültigkeitsdatum, eine Legende nur mit dem, was im Plan vorkommt, und bei vielen Linien eine Linienübersicht mit Streckenangabe machen den Plan eigenständig lesbar. Der Editor erzeugt die Legende aus deinem Netz und blendet nicht genutzte Symbole aus.</p>
+<h2 id="r11">Checkliste vor dem Export</h2>
+<ul><li>Alle Haltestellen gesetzt und mindestens einer Linie zugeordnet (Prüfung ausführen)?</li><li>Keine überlappenden Beschriftungen?</li><li>Linien gleicher Wichtigkeit gleich stark, Kategorien in der Legende erklärt?</li><li>Farben auch in Graustufen unterscheidbar?</li><li>Titel, Datum und Quelle eingetragen?</li><li>Probedruck im Zielformat geprüft?</li></ul>
+<p>Wie du diese Schritte im Editor umsetzt, zeigt die <a href="../anleitung/">Anleitung</a>. Antworten zu Export und Druck findest du in den <a href="../faq/">FAQ</a>.</p>
+<p class="cta"><a class="knopf" href="../app/">Editor öffnen</a> <a class="knopf leise" href="../anleitung/">Zur Anleitung</a></p></main>
+<footer class="fuss"><a href="../anleitung/">Anleitung</a><a href="../ratgeber/">Ratgeber</a><a href="../faq/">FAQ</a><a href="../publisher-alternative/">Publisher-Alternative</a><a href="../impressum.html">Impressum</a><a href="../datenschutz.html">Datenschutz</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Fehler melden</a><span>MIT-Lizenz</span></footer>
+</body></html>

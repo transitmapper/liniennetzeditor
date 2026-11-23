@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publisher alternative for transit maps | Liniennetz-Editor</title>
+<meta name="description" content="Microsoft Publisher was discontinued. How the free Liniennetz-Editor replaces Publisher for transit maps: differences, limits and how to switch.">
+<link rel="canonical" href="https://transitmapper.github.io/liniennetzeditor/en/publisher-alternative/">
+<link rel="alternate" hreflang="de" href="https://transitmapper.github.io/liniennetzeditor/publisher-alternative/">
+<link rel="alternate" hreflang="en" href="https://transitmapper.github.io/liniennetzeditor/en/publisher-alternative/">
+<link rel="alternate" hreflang="x-default" href="https://transitmapper.github.io/liniennetzeditor/publisher-alternative/">
+<link rel="icon" href="../../favicon.svg">
+<meta property="og:type" content="article"><meta property="og:title" content="Publisher alternative for transit maps | Liniennetz-Editor"><meta property="og:description" content="Microsoft Publisher was discontinued. How the free Liniennetz-Editor replaces Publisher for transit maps: differences, limits and how to switch."><meta property="og:url" content="https://transitmapper.github.io/liniennetzeditor/en/publisher-alternative/">
+<meta property="og:image" content="https://transitmapper.github.io/liniennetzeditor/og-image.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../../landing.css"><link rel="stylesheet" href="../../seite.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Liniennetz-Editor", "item": "https://transitmapper.github.io/liniennetzeditor/en/"}, {"@type": "ListItem", "position": 2, "name": "Publisher alternative", "item": "https://transitmapper.github.io/liniennetzeditor/en/publisher-alternative/"}]}</script>
+<script data-goatcounter="https://liniennetzeditor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head><body>
+<header class="kopf">
+<a class="marke" href="../"><svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M2 24H16L26 14H38" fill="none" stroke="#d62828" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="5" fill="#fff" stroke="#1c2024" stroke-width="3"/></svg>Liniennetz-Editor</a>
+<nav><a class="text" href="../guide/">Guide</a><a class="text" href="../design-guide/">Design guide</a><a class="text" href="../faq/">FAQ</a><a class="text" href="../#beispiele">Examples</a>
+<span class="sprache"><a href="../../publisher-alternative/" hreflang="de" lang="de">DE</a> <a href="./" hreflang="en" lang="en" aria-current="page">EN</a></span>
+<a class="knopf" href="../../app/">Open the editor</a></nav>
+</header>
+<main class="doc"><nav class="krumen" aria-label="Breadcrumb"><a href="../">Home</a> › Publisher alternative</nav><h1>Publisher alternative for transit maps</h1><p class="lead">Publisher is discontinued, but your network maps still need a tool. How Liniennetz-Editor fits, what it does differently and where its limits are.</p><h2>Why an alternative became necessary</h2>
+<p>For many hobby planners, Microsoft Publisher was the tool of choice: intuitive, sufficient for network maps and without the overhead of a professional graphics program like InDesign or Affinity. The program was discontinued at the end of October 2026. Liniennetz-Editor was built because no fitting replacement existed for exactly this job.</p>
+<h2>The difference: describe instead of draw</h2>
+<p>In a drawing program you place lines, circles and text one by one and align them by hand. The editor turns that around:</p>
+<table class="vgl"><thead><tr><th></th><th>Drawing program</th><th>Liniennetz-Editor</th></tr></thead><tbody>
+<tr><th>Starting point</th><td>Draw shapes and lines</td><td>Describe the network: stops, lines, categories</td></tr>
+<tr><th>Connections</th><td>Drawn and aligned by hand</td><td>Automatic, 0°/45°/90° only with rounded bends</td></tr>
+<tr><th>Parallel lines</th><td>Placed side by side individually</td><td>Bundled automatically, lane order adjustable</td></tr>
+<tr><th>Key</th><td>Built and maintained by hand</td><td>Generated from the network</td></tr>
+<tr><th>Changing a stop</th><td>Re-adjust parts one by one</td><td>Move it, connections follow</td></tr></tbody></table>
+<p>The result is a consistent, modern-looking map, and changes to the network take seconds instead of hours.</p>
+<h2>What the editor can do</h2>
+<ul><li>Lines with trunk, branches and loops, several categories (e.g. frequent and infrequent service)</li><li>Stops with pass-through, direction-only service, temporary service and split locations</li><li>Line badges, key and line overview</li><li>Rivers, borders and areas as drawing objects, plus free text and images</li><li>Text styles and designs to save and reuse</li><li>Export as SVG, PNG and PDF</li></ul>
+<h2>What it cannot do</h2>
+<ul><li><b>Open Publisher files.</b> There is no import for <code>.pub</code> files. You rebuild your network, see below.</li><li><b>Arbitrary layouts.</b> Lines run only in 0°, 45° and 90° segments on the grid. Drawing objects such as rivers can be routed more freely.</li><li><b>Run as a desktop program.</b> The editor is a web application and runs in the browser.</li><li><b>Replace a general graphics program.</b> It is not meant for advertising graphics or photo montages.</li></ul>
+<h2>How to switch</h2>
+<ol><li><b>Use your old map as a template.</b> Export your Publisher map as an image and place it faintly behind the grid via <b>Start › Background image…</b>. It works as a tracing template and does not appear in the export.</li><li><b>Bring over your stops.</b> Create them or import them via CSV (header row <code>Name;Column;Row</code>).</li><li><b>Assign lines.</b> Set the stop order, choose colours and categories.</li><li><b>Adjust the design.</b> Set font, line thickness and symbols to match your previous style and save it as a design.</li></ol>
+<figure class="shot"><img src="../../img/publisher/hintergrundbild-pause.png" alt="Old map as a faint background template behind the grid" loading="lazy" onerror="this.closest('figure').hidden=true"></figure>
+<p>For a detailed step-by-step walkthrough, see the <a href="../guide/">guide</a>.</p>
+<h2>Your data stays with you</h2>
+<p>The editor runs entirely in your browser; there is no account and no server that sees your maps. Projects are stored as JSON files on your computer. Exported SVG files can be edited further in any vector program. The source code is on <a href="https://github.com/transitmapper/liniennetzeditor">GitHub</a> under the MIT licence.</p>
+<p class="cta"><a class="knopf" href="../../app/">Open the editor</a> <a class="knopf leise" href="../guide/">Read the guide</a></p></main>
+<footer class="fuss"><a href="../guide/">Guide</a><a href="../design-guide/">Design guide</a><a href="../faq/">FAQ</a><a href="../publisher-alternative/">Publisher alternative</a><a href="../../impressum.html">Legal notice (German)</a><a href="../../datenschutz.html">Privacy (German)</a><a href="https://github.com/transitmapper/liniennetzeditor/issues/new/choose">Report a bug</a><span>MIT licence</span></footer>
+</body></html>

@@ -2,5 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://transitmapper.github.io/liniennetzeditor/</loc></url>
   <url><loc>https://transitmapper.github.io/liniennetzeditor/en/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/anleitung/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/en/guide/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/ratgeber/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/en/design-guide/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/faq/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/en/faq/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/publisher-alternative/</loc></url>
+  <url><loc>https://transitmapper.github.io/liniennetzeditor/en/publisher-alternative/</loc></url>
   <url><loc>https://transitmapper.github.io/liniennetzeditor/app/</loc></url>
 </urlset>
