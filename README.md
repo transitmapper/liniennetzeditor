@@ -2,70 +2,75 @@
 
 [![Deploy](https://github.com/transitmapper/liniennetzeditor/actions/workflows/deploy.yml/badge.svg)](https://github.com/transitmapper/liniennetzeditor/actions/workflows/deploy.yml)
 
-Datengetriebener Editor für moderne Liniennetzpläne, entstanden als Ersatz für Microsoft Publisher.
-Man beschreibt das Netz (Linien, Kategorien, Haltestellen) und platziert nur die Haltestellen auf einem Raster.
-Verbindungen, Rundungen, Bündelung paralleler Linien, Haltestellensymbole und Legende berechnet das Programm
-(nur 0°/45°/90°, runde Knicke).
+A data-driven editor for modern transit network maps, created as a replacement for Microsoft Publisher.
+You describe the network (lines, categories, stops) and only place the stops on a grid.
+The program calculates connections, rounded corners, bundling of parallel lines, stop symbols and the key
+(0°/45°/90° only, rounded bends).
 
-**Jetzt ausprobieren: https://transitmapper.github.io/liniennetzeditor/**
+**Try it now:**
 
-Läuft komplett im Browser, ohne Server und ohne Konto. Alle Daten bleiben auf dem eigenen Rechner.
+- Open the editor: https://transitmapper.github.io/liniennetzeditor/app/
+- Landing page (English): https://transitmapper.github.io/liniennetzeditor/en/
+- Landing page (German): https://transitmapper.github.io/liniennetzeditor/
 
-> **Sprache:** Die Oberfläche ist derzeit nur auf Deutsch verfügbar.
+Runs entirely in your browser, with no server and no account. All data stays on your computer.
 
-## Funktionen
+> **Language:** The editor interface is currently available in German only. An English interface is planned.
 
-- Setup-Assistent für Plan und Entwurf
-- Linien mit Stamm, Ästen, Ringlinien, Durchfahrt, Richtungshalt, zeitweiser Bedienung und Kopplung
-- Bündelung paralleler Linien mit einstellbarer Spurreihenfolge
-- aufgesplittete Haltestellen, Wegpunkte, mehrzeilige Namen mit automatischem Bindestrich
-- Linienbadges an beliebigen Haltestellen, an Endhaltestellen wahlweise umrandet
-- automatische Beschriftungspositionen mit Überlappungsprüfung
-- Zeichenobjekte (Flüsse, Grenzen, Flächen) mit mehreren, wiederholbaren Beschriftungen, Beschriftung in der Flächenmitte und Pfeilspitzenbeschriftung
-- Flächen in den Hintergrund stellen oder aus der Legende ausnehmen
-- Bilder und Grafiken auf dem Plan platzieren und skalieren
-- freie Texte und Astanmerkungen mit mehreren Linienbadges
-- Legende und frei platzierbare Linienübersicht, eigene Textvorlagen, Entwurf speichern und laden
-- Hintergrundbild als Pausvorlage, Auswahlmodus, CSV-Import und -Export
-- Export als SVG, PNG und PDF (Dateiname = Überschrift des Plans), Speichern als JSON
+## Features
 
-## Fehler melden und Vorschläge
+- Setup wizard for the plan and the design
+- Lines with trunk, branches, loop lines, pass-through stops, direction-only stops, temporary service and coupling
+- Bundling of parallel lines with adjustable lane order
+- Split stops, waypoints, multi-line names with automatic hyphenation
+- Line badges at any stop, outlined at terminal stops if desired
+- Automatic label positions with overlap check
+- Drawing objects (rivers, borders, areas) with multiple, repeatable labels, labels in the centre of areas and arrowhead labels
+- Send areas to the background or exclude them from the key
+- Place and scale images and graphics on the plan
+- Free text and branch annotations with multiple line badges
+- Key and freely placeable line overview, custom text styles, save and load designs
+- Background image as tracing template, selection mode, CSV import and export
+- Export as SVG, PNG and PDF (file name = plan title), save as JSON
 
-Fehler oder Ideen bitte als [Issue](../../issues/new/choose) melden. Hilfreich sind eine kurze Beschreibung,
-der Browser und, wenn möglich, die Projektdatei (.json), mit der sich der Fehler nachstellen lässt.
+## Reporting bugs and suggestions
 
-## Hinweis zu KI
+Please report bugs or ideas as an [issue](../../issues/new/choose). A short description, your browser and,
+if possible, the project file (.json) that reproduces the problem are helpful.
 
-Dieses Programm wurde mit Unterstützung von KI (Claude von Anthropic) entwickelt und vom Autor geprüft und getestet.
+## Note on AI
 
-## Lokal entwickeln
+This program was developed with the support of AI (Claude by Anthropic) and reviewed and tested by the author.
 
-Voraussetzung: [Node.js](https://nodejs.org) (LTS).
+## Local development
+
+Requires [Node.js](https://nodejs.org) (LTS).
 
 ```bash
 npm install
-npm run dev      # Entwicklungsserver
-npm run build    # erzeugt den Ordner dist
+npm run dev      # development server
+npm run build    # creates the dist folder
 ```
 
-## Veröffentlichung (GitHub Pages)
+## Deployment (GitHub Pages)
 
-Bei jedem Push auf `main` baut die GitHub Action unter `.github/workflows/deploy.yml` die App und veröffentlicht sie.
-Einmalig nötig: im Repository unter **Settings → Pages → Source** den Eintrag **GitHub Actions** wählen.
-Die Seiten `public/impressum.html` und `public/datenschutz.html` müssen vor der Veröffentlichung mit den eigenen Angaben gefüllt werden.
+On every push to `main`, the GitHub Action in `.github/workflows/deploy.yml` builds and publishes the app.
+One-time setup: in the repository, go to **Settings → Pages → Source** and choose **GitHub Actions**.
+The pages `public/impressum.html` and `public/datenschutz.html` (legal notice and privacy policy) must be filled in with your own details before publishing.
 
-## Projektstruktur
+## Project structure
 
 ```
-src/core/engine.js   Berechnung und SVG-Zeichnung (Routing, Bündelung, Legende)
-src/store.js         Zustand mit Undo/Redo
-src/App.jsx          Ribbon und Dateifunktionen
-src/*Dialog*.jsx     Pop-ups für Plan, Haltestellen, Linien, Entwurf, Zeichnen
-src/Wizard.jsx       Setup-Assistent
-src/Info.jsx         Info-Pop-up
-public/              Impressum und Datenschutz
+src/core/engine.js   Calculation and SVG drawing (routing, bundling, key)
+src/store.js         State with undo/redo
+src/App.jsx          Ribbon and file functions
+src/*Dialog*.jsx     Pop-ups for plan, stops, lines, design, drawing
+src/Wizard.jsx       Setup wizard
+src/Info.jsx         Info pop-up
+public/              Landing pages (de/en), legal notice and privacy policy
+app/                 Entry point of the editor
 ```
 
-## Lizenz
+## License
 
-MIT, siehe [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
